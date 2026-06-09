@@ -1,0 +1,2432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tella Learning — Production & Growth</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+  --bg:#eef2f1;--bg-grad-1:#e7efee;--bg-grad-2:#eef1f4;--surface:#fff;--surface-2:#f6f8f8;
+  --ink:#11201f;--ink-soft:#5a6b6a;--ink-faint:#8a9897;--line:#e3e9e8;
+  --primary:#0c6e6b;--primary-deep:#084e4c;--primary-soft:#d7eceb;
+  --amber:#e08a00;--amber-soft:#fdedd2;--green:#1f9d57;--green-soft:#d8f1e2;--red:#d94a4a;--red-soft:#fadede;
+  --shadow:0 1px 2px rgba(16,40,39,.04),0 8px 24px rgba(16,40,39,.06);
+  --shadow-lg:0 2px 4px rgba(16,40,39,.05),0 18px 48px rgba(16,40,39,.10);
+  --radius:22px;--radius-sm:14px;
+}
+body.dark{
+  --bg:#0a1413;--bg-grad-1:#0c1817;--bg-grad-2:#0a1211;--surface:#10201e;--surface-2:#0d1a19;
+  --ink:#eaf2f1;--ink-soft:#9fb2b0;--ink-faint:#6c7e7d;--line:#1e302e;
+  --primary:#2fb9b4;--primary-deep:#1d8d89;--primary-soft:#11302f;
+  --amber:#f0a83a;--amber-soft:#2e2415;--green:#3fc279;--green-soft:#12281e;--red:#ef6b6b;--red-soft:#2c1817;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 28px rgba(0,0,0,.35);--shadow-lg:0 2px 4px rgba(0,0,0,.4),0 20px 50px rgba(0,0,0,.5);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Hanken Grotesk',sans-serif;color:var(--ink);min-height:100vh;-webkit-font-smoothing:antialiased;
+  background:radial-gradient(1100px 700px at 88% -8%,var(--primary-soft) 0%,transparent 55%),linear-gradient(160deg,var(--bg-grad-1),var(--bg-grad-2));
+  background-attachment:fixed;transition:background .4s,color .3s}
+::selection{background:var(--primary);color:#fff}
+.num{font-family:'Bricolage Grotesque',sans-serif;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+h1,h2,h3{font-family:'Bricolage Grotesque',sans-serif;letter-spacing:-.02em;line-height:1.05}
+
+.topbar{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:18px;padding:16px clamp(18px,4vw,46px);
+  background:color-mix(in srgb,var(--bg) 72%,transparent);backdrop-filter:blur(16px);border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:11px;font-weight:700;font-family:'Bricolage Grotesque';font-size:19px}
+.logo{width:34px;height:34px;border-radius:11px;background:linear-gradient(145deg,var(--primary),var(--primary-deep));display:grid;place-items:center;color:#fff;box-shadow:0 6px 14px color-mix(in srgb,var(--primary) 45%,transparent)}
+.logo svg{width:19px;height:19px}
+.brand small{font-family:'Hanken Grotesk';font-weight:500;color:var(--ink-faint);font-size:11.5px;display:block;letter-spacing:.02em;margin-top:-3px}
+.switch{margin-left:auto;display:flex;background:var(--surface-2);border:1px solid var(--line);border-radius:13px;padding:4px;overflow:auto}
+.switch button{font-family:'Hanken Grotesk';font-weight:600;font-size:13.5px;color:var(--ink-soft);border:none;background:none;padding:9px 16px;border-radius:9px;cursor:pointer;transition:.2s;white-space:nowrap}
+.switch button.active{background:var(--surface);color:var(--primary);box-shadow:var(--shadow)}
+.iconbtn{width:40px;height:40px;border-radius:11px;border:1px solid var(--line);background:var(--surface);cursor:pointer;display:grid;place-items:center;color:var(--ink-soft);transition:.2s;flex-shrink:0}
+.iconbtn:hover{color:var(--primary);border-color:var(--primary)}
+.iconbtn svg{width:18px;height:18px}
+
+.view{display:none;padding:clamp(20px,3.4vw,40px) clamp(18px,4vw,46px) 70px;max-width:1320px;margin:0 auto;animation:fade .5s}
+.view.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:24px;transition:transform .25s,box-shadow .25s}
+.reveal{opacity:0;transform:translateY(14px);animation:reveal .6s cubic-bezier(.2,.7,.3,1) forwards}
+@keyframes reveal{to{opacity:1;transform:none}}
+.mt20{margin-top:20px}
+
+/* STAFF */
+.hello{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap;margin-bottom:6px}
+.hello h1{font-size:clamp(26px,3.4vw,38px)}
+.hello .date{color:var(--ink-soft);font-size:14.5px;margin-top:7px;font-weight:500}
+.streak{display:inline-flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:9px 16px;box-shadow:var(--shadow);font-weight:600;font-size:14px}
+.streak .flame{font-size:18px;filter:drop-shadow(0 2px 4px rgba(224,138,0,.5));animation:flick 1.8s ease-in-out infinite}
+@keyframes flick{0%,100%{transform:rotate(-4deg) scale(1)}50%{transform:rotate(4deg) scale(1.12)}}
+.staff-top{display:grid;grid-template-columns:1.05fr 1.45fr;gap:20px;margin-top:22px}
+@media(max-width:900px){.staff-top{grid-template-columns:1fr}}
+.ring-card{display:flex;flex-direction:column;align-items:center;text-align:center;position:relative;overflow:hidden}
+.ring-card::before{content:"";position:absolute;inset:0;background:radial-gradient(420px 200px at 50% -30%,var(--primary-soft),transparent 70%);opacity:.6}
+.ring-wrap{position:relative;width:230px;height:230px;margin:6px 0 4px;z-index:1}
+.ring-wrap svg{transform:rotate(-90deg)}
+.ring-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.ring-center .big{font-size:58px;font-weight:700;line-height:.9;color:var(--ink)}
+.ring-center .sub{color:var(--ink-soft);font-size:14px;font-weight:600;margin-top:6px}
+.ring-center .lbl{color:var(--ink-faint);font-size:11.5px;text-transform:uppercase;letter-spacing:.13em;margin-top:9px;font-weight:600}
+.ring-foot{z-index:1;margin-top:8px;font-size:13.5px;color:var(--ink-soft);font-weight:500}.ring-foot b{color:var(--primary)}
+.log-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.log-head h2{font-size:20px}.log-head .hint{font-size:12.5px;color:var(--ink-faint);font-weight:500}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:12px;font-weight:600;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.06em;margin-bottom:7px}
+select,input[type=number],input[type=text]{width:100%;font-family:'Hanken Grotesk';font-size:15px;font-weight:500;color:var(--ink);background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:13px 14px;transition:.2s}
+select{cursor:pointer}
+select:focus,input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-soft)}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.tiers{display:flex;gap:8px}
+.tier{flex:1;text-align:center;padding:11px 6px;border-radius:11px;border:1.5px solid var(--line);background:var(--surface-2);cursor:pointer;font-weight:600;font-size:13.5px;color:var(--ink-soft);transition:.18s}
+.tier .mult{display:block;font-size:11px;color:var(--ink-faint);font-weight:600;margin-top:2px}
+.tier.sel{border-color:var(--primary);background:var(--primary-soft);color:var(--primary-deep)}
+.calc{display:flex;align-items:center;justify-content:space-between;background:var(--primary-soft);border-radius:13px;padding:14px 18px;margin:16px 0 14px}
+.calc .lbl{font-size:13px;font-weight:600;color:var(--primary-deep)}
+.calc .val{font-family:'Bricolage Grotesque';font-size:30px;font-weight:700;color:var(--primary-deep)}.calc .val small{font-size:14px;font-weight:600}
+.btn{width:100%;font-family:'Hanken Grotesk';font-weight:700;font-size:15px;color:#fff;background:linear-gradient(135deg,var(--primary),var(--primary-deep));border:none;border-radius:13px;padding:15px;cursor:pointer;transition:.2s;box-shadow:0 8px 18px color-mix(in srgb,var(--primary) 35%,transparent)}
+.btn:hover{transform:translateY(-2px);box-shadow:0 12px 24px color-mix(in srgb,var(--primary) 45%,transparent)}
+.btn:active{transform:translateY(0)}
+.btn.sm{width:auto;padding:11px 20px;font-size:14px}
+.logitem{display:flex;align-items:center;gap:14px;padding:13px 0;border-bottom:1px solid var(--line)}.logitem:last-child{border:none}
+.logitem .ico{width:38px;height:38px;border-radius:11px;background:var(--surface-2);display:grid;place-items:center;flex-shrink:0;font-size:18px}
+.logitem .meta{flex:1;min-width:0}.logitem .meta .t{font-weight:600;font-size:14.5px}.logitem .meta .s{font-size:12.5px;color:var(--ink-faint);font-weight:500}
+.logitem .pts{font-family:'Bricolage Grotesque';font-weight:700;font-size:17px;flex-shrink:0}
+.chip{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;padding:5px 10px;border-radius:999px;white-space:nowrap}
+.chip .dot{width:7px;height:7px;border-radius:50%}
+.chip.prov{background:var(--amber-soft);color:var(--amber)}.chip.prov .dot{background:var(--amber);animation:pulse 1.4s infinite}
+.chip.conf{background:var(--green-soft);color:var(--green)}.chip.conf .dot{background:var(--green)}
+.chip.rew{background:var(--red-soft);color:var(--red)}.chip.rew .dot{background:var(--red)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+.flip-conf{animation:flipc .7s}@keyframes flipc{0%{transform:scale(1)}30%{transform:scale(1.04);background:var(--green-soft)}100%{transform:scale(1)}}
+.assigned{background:var(--primary-soft);border-radius:13px;padding:13px 16px;margin-bottom:16px;display:flex;gap:11px;align-items:flex-start}
+.assigned .pin{font-size:17px}.assigned .at{font-weight:600;font-size:13.5px;color:var(--primary-deep)}.assigned .ad{font-size:12.5px;color:var(--primary-deep);opacity:.85;margin-top:2px}
+.staff-grid{display:grid;grid-template-columns:1.3fr 1fr;gap:20px;margin-top:20px}
+@media(max-width:900px){.staff-grid{grid-template-columns:1fr}}
+.impact{background:linear-gradient(140deg,var(--primary-deep),var(--primary));color:#fff;border:none;position:relative;overflow:hidden}
+.impact::after{content:"";position:absolute;right:-40px;top:-40px;width:180px;height:180px;border-radius:50%;background:rgba(255,255,255,.08)}
+.impact .eyebrow{font-size:12px;text-transform:uppercase;letter-spacing:.13em;font-weight:700;opacity:.85;border-bottom:1px solid rgba(255,255,255,0.25);padding-bottom:10px;}
+.stats-table {width: 100%; border-collapse: collapse; margin-top: 12px; margin-bottom: 12px; position: relative; z-index: 1;}
+.stats-table th {font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: rgba(255, 255, 255, 0.7); border-bottom: 1px solid rgba(255, 255, 255, 0.15); padding: 8px 0; text-align: left; font-family: 'Hanken Grotesk', sans-serif; font-weight: 700;}
+.stats-table td {padding: 8px 0; border: none; border-bottom: 1px solid rgba(255, 255, 255, 0.08); font-size: 13.5px; font-weight: 500; color: rgba(255, 255, 255, 0.95); vertical-align: middle;}
+.stats-table tr:last-child td {border-bottom: none;}
+.standings-row {display: flex; justify-content: space-between; border-top: 1px solid rgba(255, 255, 255, 0.2); padding-top: 12px; margin-top: 4px; position: relative; z-index: 1;}
+.standings-item {display: flex; flex-direction: column;}
+.standings-item .lbl {font-size: 10.5px; text-transform: uppercase; letter-spacing: .05em; color: rgba(255, 255, 255, 0.7); font-weight: 600;}
+.standings-item .val {font-family: 'Bricolage Grotesque'; font-size: 18px; font-weight: 700; color: #fff; margin-top: 2px;}
+.level h3{font-size:17px;margin-bottom:4px}
+.level .path{display:flex;justify-content:space-between;font-size:13px;color:var(--ink-soft);font-weight:600;margin:14px 0 9px}.level .path .now{color:var(--primary)}
+.bar{height:13px;border-radius:999px;background:var(--surface-2);overflow:hidden;border:1px solid var(--line)}
+.bar>div{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--primary),var(--primary-deep));width:0;transition:width 1.3s cubic-bezier(.2,.7,.3,1)}
+.level .xp{font-size:13px;color:var(--ink-faint);margin-top:10px;font-weight:500}.level .xp b{color:var(--ink)}
+.report{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:6px}
+.seg{display:flex;background:var(--surface-2);border:1px solid var(--line);border-radius:11px;padding:3px}
+.seg button{border:none;background:none;font-family:'Hanken Grotesk';font-weight:600;font-size:13px;color:var(--ink-soft);padding:8px 14px;border-radius:8px;cursor:pointer;transition:.18s}
+.seg button.on{background:var(--surface);color:var(--primary);box-shadow:var(--shadow)}
+.pdf{display:inline-flex;align-items:center;gap:8px;background:var(--surface-2);border:1px solid var(--line);font-family:'Hanken Grotesk';font-weight:600;font-size:13.5px;color:var(--ink);padding:11px 17px;border-radius:11px;cursor:pointer;transition:.2s}
+.pdf:hover{border-color:var(--primary);color:var(--primary)}
+
+/* ADMIN */
+.adm-head{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:16px;margin-bottom:24px}
+.adm-head h1{font-size:clamp(24px,3vw,34px)}.adm-head p{color:var(--ink-soft);font-size:14.5px;margin-top:6px;font-weight:500}
+.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-bottom:20px}
+@media(max-width:1000px){.stat-row{grid-template-columns:repeat(2,1fr)}}@media(max-width:560px){.stat-row{grid-template-columns:1fr}}
+.stat .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.stat .top .name{font-size:13px;color:var(--ink-soft);font-weight:600}
+.stat .top .ic{width:34px;height:34px;border-radius:10px;background:var(--primary-soft);color:var(--primary-deep);display:grid;place-items:center;font-size:17px}
+.stat .v{font-family:'Bricolage Grotesque';font-size:38px;font-weight:700;line-height:1}
+.stat .trend{display:inline-flex;align-items:center;gap:5px;font-size:13px;font-weight:700;margin-top:10px}
+.stat .trend.up{color:var(--green)}.stat .trend.dn{color:var(--red)}.stat .trend .wk{color:var(--ink-faint);font-weight:500}
+.adm-grid{display:grid;grid-template-columns:1.4fr 1fr;gap:20px}@media(max-width:980px){.adm-grid{grid-template-columns:1fr}}
+.sec-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;gap:12px;flex-wrap:wrap}
+.sec-h h2{font-size:19px}
+.sec-h .tag{font-size:12px;font-weight:700;padding:5px 11px;border-radius:999px}
+.tag.ok{background:var(--green-soft);color:var(--green)}.tag.warn{background:var(--amber-soft);color:var(--amber)}
+.forecast .big{font-family:'Bricolage Grotesque';font-size:30px;font-weight:700;color:var(--primary)}
+.forecast .lbl{font-size:13.5px;color:var(--ink-soft);font-weight:500;margin-bottom:16px}
+.forecast .meta{display:flex;justify-content:space-between;font-size:12.5px;color:var(--ink-faint);font-weight:600;margin-top:9px}
+.quality .num{font-size:44px;font-weight:700}.quality .delta{font-size:13px;font-weight:700;color:var(--green);margin-left:8px}.spark{margin-top:14px}
+.qitem{display:flex;align-items:center;gap:14px;padding:13px 0;border-bottom:1px solid var(--line)}.qitem:last-child{border:none}
+.av{width:38px;height:38px;border-radius:50%;background:var(--primary-soft);color:var(--primary-deep);display:grid;place-items:center;font-weight:700;font-size:14px;flex-shrink:0;font-family:'Bricolage Grotesque'}
+.qitem .info{flex:1;min-width:0}.qitem .info .a{font-weight:600;font-size:14.5px}.qitem .info .b{font-size:12.5px;color:var(--ink-faint);font-weight:500}
+.qitem .acts{display:flex;gap:8px}
+.qbtn{width:36px;height:36px;border-radius:10px;border:1.5px solid var(--line);background:var(--surface);cursor:pointer;display:grid;place-items:center;transition:.18s}
+.qbtn.app:hover{background:var(--green-soft);border-color:var(--green);color:var(--green)}
+.qbtn.rej:hover{background:var(--red-soft);border-color:var(--red);color:var(--red)}
+.qbtn svg{width:17px;height:17px}
+.empty{text-align:center;color:var(--ink-faint);padding:30px 0;font-weight:500;font-size:14px}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;font-size:11.5px;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-faint);font-weight:700;padding:0 0 12px}
+td{padding:13px 0;border-top:1px solid var(--line);font-size:14px;font-weight:500;vertical-align:middle}
+.who{display:flex;align-items:center;gap:11px}.who .av{width:34px;height:34px;font-size:13px}.who .role{font-size:12px;color:var(--ink-faint);font-weight:500}
+.att{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;padding:5px 10px;border-radius:999px}
+.att.in{background:var(--green-soft);color:var(--green)}.att.out{background:var(--surface-2);color:var(--ink-faint)}
+.payroll-note{font-size:12px;color:var(--ink-faint);font-weight:500;margin-top:14px;display:flex;gap:7px;align-items:center}
+.inc-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.inc-row .v{font-family:'Bricolage Grotesque';font-weight:700;font-size:18px;color:var(--primary)}
+input[type=range]{width:100%;-webkit-appearance:none;appearance:none;height:6px;border-radius:999px;background:var(--surface-2);border:1px solid var(--line);margin:8px 0 4px}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:var(--primary);cursor:pointer;border:3px solid var(--surface);box-shadow:var(--shadow)}
+.toggle{display:flex;align-items:center;justify-content:space-between;margin-top:18px;padding-top:18px;border-top:1px solid var(--line)}
+.toggle .lab{font-size:14px;font-weight:600}.toggle .lab small{display:block;color:var(--ink-faint);font-weight:500;font-size:12px;margin-top:3px}
+.sw{width:48px;height:28px;border-radius:999px;background:var(--green);position:relative;cursor:pointer;transition:.2s;flex-shrink:0;border:none}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:.22s;box-shadow:0 2px 5px rgba(0,0,0,.2)}
+.sw.off{background:var(--line)}.sw.off::after{left:23px}
+.feed-item{display:flex;align-items:flex-start;gap:13px;padding:13px 0;border-bottom:1px solid var(--line)}.feed-item:last-child{border:none}
+.feed-item .bubble{width:34px;height:34px;border-radius:11px;display:grid;place-items:center;font-size:16px;flex-shrink:0;background:var(--primary-soft)}
+.feed-item .ft{font-size:14px;font-weight:500;line-height:1.4}.feed-item .ft b{font-weight:700}
+.feed-item .fwhen{font-size:11.5px;color:var(--ink-faint);font-weight:500;margin-top:3px}
+
+/* SUPER ADMIN */
+.role-badge{display:inline-flex;align-items:center;gap:7px;background:linear-gradient(135deg,var(--primary),var(--primary-deep));color:#fff;font-size:11.5px;font-weight:700;padding:5px 12px;border-radius:999px;letter-spacing:.04em}
+.sup-grid{display:grid;grid-template-columns:1.25fr 1fr;gap:20px}@media(max-width:980px){.sup-grid{grid-template-columns:1fr}}
+.tasktable td{padding:11px 0}
+.pts-in{width:74px;text-align:center;padding:8px;font-family:'Bricolage Grotesque';font-weight:700}
+.del{width:30px;height:30px;border-radius:8px;border:1.5px solid var(--line);background:var(--surface);cursor:pointer;color:var(--ink-faint);display:grid;place-items:center;transition:.18s}
+.del:hover{border-color:var(--red);color:var(--red);background:var(--red-soft)}.del svg{width:15px;height:15px}
+.addform{display:grid;grid-template-columns:1.6fr 1fr .7fr auto;gap:10px;align-items:end;margin-top:18px;padding-top:18px;border-top:1px solid var(--line)}
+@media(max-width:680px){.addform{grid-template-columns:1fr 1fr}}
+.mini-label{font-size:11px;font-weight:600;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;display:block}
+.cfg-row{display:flex;justify-content:space-between;align-items:center;padding:13px 0;border-bottom:1px solid var(--line)}.cfg-row:last-child{border:none}
+.cfg-row .cl{font-size:14px;font-weight:600}.cfg-row .cl small{display:block;color:var(--ink-faint);font-weight:500;font-size:12px;margin-top:2px}
+.cfg-row input{width:90px;text-align:center;font-family:'Bricolage Grotesque';font-weight:700;font-size:16px;padding:9px}
+.lvl-chip{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--ink-soft)}
+.lvl-dot{width:10px;height:10px;border-radius:50%;background:var(--primary)}
+.assign-list .qitem .info .a{font-size:14px}
+.an-grid{display:grid;grid-template-columns:1.5fr 1fr;gap:20px}@media(max-width:980px){.an-grid{grid-template-columns:1fr}}
+.chart-axis{font-family:'Hanken Grotesk';font-size:10px;fill:var(--ink-faint);font-weight:600}
+.barlbl{font-size:12px;font-weight:600;color:var(--ink-soft)}
+.mixrow{display:flex;align-items:center;gap:12px;margin-bottom:13px}
+.mixrow .ml{width:90px;font-size:13px;font-weight:600;flex-shrink:0}
+.mixrow .mbar{flex:1;height:12px;border-radius:999px;background:var(--surface-2);overflow:hidden}
+.mixrow .mbar>div{height:100%;border-radius:999px;transition:width 1.2s cubic-bezier(.2,.7,.3,1);width:0}
+.mixrow .mv{font-family:'Bricolage Grotesque';font-weight:700;font-size:15px;width:48px;text-align:right}
+
+#toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(120px);z-index:200;background:var(--ink);color:var(--bg);font-weight:600;font-size:14px;padding:13px 22px;border-radius:13px;box-shadow:var(--shadow-lg);transition:transform .35s cubic-bezier(.2,.8,.3,1);max-width:90vw}
+#toast.show{transform:translateX(-50%) translateY(0)}
+#confetti{position:fixed;inset:0;pointer-events:none;z-index:300}
+
+.contrib-bar {
+  animation: growSVGBar 0.8s cubic-bezier(0.2, 0.7, 0.3, 1) forwards;
+}
+@keyframes growSVGBar {
+  from {
+    height: 0;
+    y: 120px;
+  }
+}
+
+/* AUTH */
+#login{position:fixed;inset:0;z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;
+  background:radial-gradient(1100px 700px at 80% -10%,var(--primary-soft),transparent 55%),linear-gradient(160deg,var(--bg-grad-1),var(--bg-grad-2))}
+#login.hidden{display:none}
+.login-card{width:100%;max-width:382px;background:var(--surface);border:1px solid var(--line);border-radius:24px;box-shadow:var(--shadow-lg);padding:34px 30px;animation:reveal .5s forwards}
+.login-card .logo{width:46px;height:46px;border-radius:14px;margin-bottom:18px}
+.login-card .logo svg{width:25px;height:25px}
+.login-card h2{font-size:25px;margin-bottom:5px}
+.login-card .sub{color:var(--ink-soft);font-size:14px;margin-bottom:24px;font-weight:500}
+.login-card input{margin-bottom:14px}
+.lerr{color:var(--red);font-size:13px;font-weight:600;min-height:20px;margin-bottom:4px}
+.demo{margin-top:22px;padding-top:18px;border-top:1px solid var(--line);font-size:12.5px;color:var(--ink-faint);line-height:1.85;font-weight:500}
+.demo b{color:var(--ink-soft);font-weight:700}
+.userchip{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:5px 6px 5px 14px;box-shadow:var(--shadow)}
+.userchip .ui{font-size:13px;font-weight:700;line-height:1.15}
+.userchip .ur{font-size:10px;color:var(--ink-faint);font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.userchip .av{width:30px;height:30px;font-size:11px}
+@media(max-width:680px){.userchip div{display:none}}
+.rolechip{font-size:11px;font-weight:700;padding:4px 10px;border-radius:999px}
+.rolechip.super{background:var(--primary-soft);color:var(--primary-deep)}
+.rolechip.admin{background:var(--amber-soft);color:var(--amber)}
+.rolechip.staff{background:var(--surface-2);color:var(--ink-soft)}
+.pwedit{width:130px;padding:8px 10px;margin:0;display:inline-block;vertical-align:middle}
+
+/* PRINT / PDF REPORT */
+#printArea{display:none}
+.report-doc{color:#11201f;font-family:'Hanken Grotesk',sans-serif}
+.report-doc .rhead{display:flex;justify-content:space-between;align-items:flex-start;background:#0c6e6b;color:#fff;padding:26px 28px;border-radius:14px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.report-doc .rbrand{font-family:'Bricolage Grotesque';font-size:24px;font-weight:800}
+.report-doc .rtitle{font-size:13px;opacity:.92;margin-top:4px}
+.report-doc .rgen{font-size:10px;text-align:right;opacity:.9;line-height:1.5}
+.report-doc .rh{font-family:'Bricolage Grotesque';font-size:15px;color:#0c6e6b;margin:26px 0 12px;padding-bottom:7px;border-bottom:1px solid #e1e6e5}
+.report-doc .rgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.report-doc .rstat{border:1px solid #e1e6e5;border-radius:11px;padding:13px 14px}
+.report-doc .rsn{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:#5a6b6a;font-weight:700}
+.report-doc .rsv{font-family:'Bricolage Grotesque';font-size:26px;font-weight:700;margin:5px 0 3px}
+.report-doc .rsd{font-size:10px;color:#5a6b6a;font-weight:600}
+.report-doc .rtable{width:100%;border-collapse:collapse}
+.report-doc .rtable td,.report-doc .rtable th{padding:9px 0;border-bottom:1px solid #eef2f1;font-size:12px;text-align:left}
+.report-doc .rtable th{font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:#8a9897}
+.report-doc .rk{color:#5a6b6a}
+.report-doc .rv{text-align:right;font-weight:700}
+.report-doc .rmut{color:#5a6b6a}
+.report-doc .rnum{text-align:right;font-weight:700;color:#0c6e6b;font-family:'Bricolage Grotesque'}
+.report-doc .rfoot{margin-top:26px;padding-top:14px;border-top:1px solid #e1e6e5;font-size:10px;color:#8a9897;line-height:1.6}
+@media print{
+  @page{margin:14mm}
+  body{background:#fff !important}
+  body>*:not(#printArea){display:none !important}
+  #printArea{display:block !important}
+  #toast,#confetti{display:none !important}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login">
+  <div class="login-card">
+    <img src="tella_logo.png" alt="Tella Logo" style="height: 52px; margin-bottom: 20px; border-radius: 12px; background: #fff; padding: 4px 10px; border: 1px solid var(--line); box-shadow: var(--shadow); object-fit: contain; align-self: flex-start; display: block;">
+    <h2>Welcome to Tella</h2>
+    <div class="sub">Sign in to your production workspace</div>
+    <span class="mini-label">Username</span>
+    <input type="text" id="liUser" placeholder="username" autocomplete="username">
+    <span class="mini-label">Password</span>
+    <input type="password" id="liPass" placeholder="password" autocomplete="current-password">
+    <div class="lerr" id="liErr"></div>
+    <button class="btn" id="liBtn">Sign in →</button>
+    <div class="demo"><b>Demo accounts</b><br>Super admin&nbsp;—&nbsp;<b>super</b> / Super@2026<br>Admin&nbsp;—&nbsp;<b>admin</b> / Admin@2026<br>Staff&nbsp;—&nbsp;<b>anjana</b> / Staff@2026<br><a href="#" id="dbgBtn" style="color:var(--ink-soft);text-decoration:underline;display:block;margin-top:10px;font-weight:600">Troubleshoot &amp; view loaded accounts</a></div>
+  </div>
+</div>
+
+<div class="topbar">
+  <div class="brand">
+    <img src="tella_logo.png" alt="Tella Logo" style="height: 34px; border-radius: 8px; background: #fff; padding: 2px 6px; border: 1px solid var(--line); box-shadow: var(--shadow);">
+    <small style="font-family:'Hanken Grotesk';font-weight:600;color:var(--ink-soft);font-size:12.5px;letter-spacing:.02em;margin-left:4px">production &amp; growth</small>
+    <span id="topbarStatusPill" style="display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700; color: var(--ink-faint); margin-left: 12px; background: var(--surface-2); padding: 4px 10px; border-radius: 999px; border: 1px solid var(--line);"><span style="width: 6px; height: 6px; border-radius: 50%; background: var(--ink-faint); display: inline-block;" id="topbarStatusDot"></span>Connecting…</span>
+  </div>
+  <div class="switch">
+    <button class="active" data-view="staff">Staff</button>
+    <button data-view="admin">Admin Console</button>
+    <button data-view="super">Super Admin</button>
+  </div>
+  <div class="userchip" id="userChip" style="display:none">
+    <div><div class="ui" id="ucName">—</div><div class="ur" id="ucRole">—</div></div>
+    <span class="av" id="ucAv">–</span>
+  </div>
+  <button class="iconbtn" id="theme" title="Toggle theme">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.8A9 9 0 1111.2 3 7 7 0 0021 12.8z"/></svg>
+  </button>
+  <button class="iconbtn" id="logout" title="Sign out" style="display:none">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg>
+  </button>
+</div>
+
+<!-- ============ STAFF ============ -->
+<section class="view active" id="staff">
+  <div class="hello reveal" style="animation-delay:.05s">
+    <div><h1 id="greetName">Good morning, Anjana</h1><div class="date" id="greetRole">Monday, 8 June 2026 · Senior Content writer</div></div>
+    <div class="streak"><span class="flame" style="filter:grayscale(1);opacity:0.4">🔥</span> 0-day streak</div>
+  </div>
+  <div id="assignBanner"></div>
+  <div class="staff-top">
+    <div class="card ring-card reveal" style="animation-delay:.12s">
+      <div class="ring-wrap">
+        <svg width="230" height="230" viewBox="0 0 230 230">
+          <circle cx="115" cy="115" r="100" fill="none" stroke="var(--surface-2)" stroke-width="18"/>
+          <circle id="ring" cx="115" cy="115" r="100" fill="none" stroke="url(#g)" stroke-width="18" stroke-linecap="round" stroke-dasharray="628.3" stroke-dashoffset="628.3"/>
+          <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="var(--primary)"/><stop offset="1" stop-color="var(--primary-deep)"/></linearGradient></defs>
+        </svg>
+        <div class="ring-center">
+          <span class="big num"><span id="cpts">0</span><span style="font-size:26px;color:var(--ink-faint)"> / <span id="tgtRing">50</span></span></span>
+          <span class="sub">confirmed points today</span><span class="lbl">daily target</span>
+        </div>
+      </div>
+      <div class="ring-foot">+<b><span id="provN">0</span> provisional</b> awaiting review</div>
+    </div>
+    <div class="card reveal" style="animation-delay:.18s">
+      <div class="log-head"><h2>Log today's work</h2><span class="hint">points auto-calculate</span></div>
+      <div class="field"><label>Task</label><select id="task"></select></div>
+      <div class="row2">
+        <div class="field"><label>Quantity</label><input type="number" id="qty" value="10" min="1"></div>
+        <div class="field"><label>Difficulty</label><div class="tiers" id="tierWrap"></div></div>
+      </div>
+      <div class="calc"><span class="lbl">Points for this entry</span><span class="val num">+<span id="calc">0</span><small> pts</small></span></div>
+      <button class="btn" id="logBtn">Log it →</button>
+    </div>
+  </div>
+  <div class="staff-grid">
+    <div class="card impact reveal" style="animation-delay:.24s; padding: 22px 24px;">
+      <div class="eyebrow" style="margin-bottom: 6px;">My Contribution Stats</div>
+      <table class="stats-table">
+        <thead>
+          <tr>
+            <th>Activity</th>
+            <th style="text-align: right;">This Week</th>
+            <th style="text-align: right;">This Month</th>
+            <th style="text-align: right;">Lifetime</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Questions Confirmed</td>
+            <td style="text-align: right; font-family: 'Bricolage Grotesque'; font-weight: 700;" id="statsQWeek">0</td>
+            <td style="text-align: right; font-family: 'Bricolage Grotesque'; font-weight: 700;" id="statsQMonth">0</td>
+            <td style="text-align: right; font-family: 'Bricolage Grotesque'; font-weight: 700;" id="statsQLifetime">0</td>
+          </tr>
+          <tr>
+            <td>Other Tasks Confirmed</td>
+            <td style="text-align: right; font-family: 'Bricolage Grotesque'; font-weight: 700;" id="statsOWeek">0</td>
+            <td style="text-align: right; font-family: 'Bricolage Grotesque'; font-weight: 700;" id="statsOMonth">0</td>
+            <td style="text-align: right; font-family: 'Bricolage Grotesque'; font-weight: 700;" id="statsOLifetime">0</td>
+          </tr>
+          <tr>
+            <td>Points Confirmed</td>
+            <td style="text-align: right; font-family: 'Bricolage Grotesque'; font-weight: 700; color: var(--primary-soft);" id="statsPWeek">0</td>
+            <td style="text-align: right; font-family: 'Bricolage Grotesque'; font-weight: 700; color: var(--primary-soft);" id="statsPMonth">0</td>
+            <td style="text-align: right; font-family: 'Bricolage Grotesque'; font-weight: 700; color: var(--primary-soft);" id="statsPLifetime">0</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="standings-row">
+        <div class="standings-item">
+          <span class="lbl">Team Standing</span>
+          <span class="val" id="statsRank">#—</span>
+        </div>
+        <div class="standings-item">
+          <span class="lbl">Daily Goal</span>
+          <span class="val" id="statsGoalProgress">0%</span>
+        </div>
+        <div class="standings-item">
+          <span class="lbl">Growth Level</span>
+          <span class="val" id="statsLevel">Level —</span>
+        </div>
+      </div>
+    </div>
+    <div class="card level reveal" style="animation-delay:.30s">
+      <h3>Your growth</h3>
+      <div id="growthLevelTitle" style="font-size:13.5px;color:var(--ink-soft);font-weight:500">Level 1 of 3 · start your journey</div>
+      <div class="path" id="growthLevelPath"><span class="now">● Contributor</span><span>→ Senior</span></div>
+      <div class="bar"><div id="xpbar"></div></div>
+      <div class="xp" id="growthXpText"><b>0 / 500 XP</b> — 500 to reach Senior</div>
+      <div id="growthSkillsBlock" style="margin-top:18px;font-size:13px;color:var(--ink-soft);line-height:1.6">Skills sharpening: <b style="color:var(--ink-soft)">Log completed tasks</b> to sharpen your concept clarity and question design.</div>
+    </div>
+  </div>
+  <div class="card mt20 reveal" style="animation-delay:.36s">
+    <div class="log-head"><h2>What I shipped today</h2><span class="hint">mixed statuses</span></div>
+    <div id="shipList"></div>
+    <div class="report" style="margin-top:18px;padding-top:18px;border-top:1px solid var(--line)">
+      <div class="seg" id="staffSeg"><button class="on">Daily</button><button>Weekly</button><button>Monthly</button><button>Yearly</button></div>
+      <button class="pdf" style="margin-left:auto" onclick="genPDF('staff')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 3v5h5"/><path d="M9 13h6M9 17h6M14 3H6v18h12V8z"/></svg> Generate report (PDF)</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ADMIN ============ -->
+<section class="view" id="admin">
+  <div class="adm-head">
+    <div><h1>Content Operations</h1><p>Team production this month · <span id="activeStaffCount">8</span> active content staff</p></div>
+    <button class="pdf" onclick="genPDF('ops')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 15V3M7 10l5 5 5-5M5 21h14"/></svg> Export</button>
+  </div>
+  <div class="stat-row">
+    <div class="card stat reveal" style="animation-delay:.05s"><div class="top"><span class="name">Questions confirmed</span><span class="ic">❓</span></div><div class="v num" id="statQ">0</div><div class="trend" id="trendQ"></div></div>
+    <div class="card stat reveal" style="animation-delay:.10s"><div class="top"><span class="name">Videos confirmed</span><span class="ic">🎬</span></div><div class="v num" id="statV">0</div><div class="trend" id="trendV"></div></div>
+    <div class="card stat reveal" style="animation-delay:.15s"><div class="top"><span class="name">Lessons confirmed</span><span class="ic">📚</span></div><div class="v num" id="statL">0</div><div class="trend" id="trendL"></div></div>
+    <div class="card stat reveal" style="animation-delay:.20s"><div class="top"><span class="name">Active velocity</span><span class="ic">⚡</span></div><div class="v num" id="statVel">0</div><div class="trend" id="trendVel"></div></div>
+  </div>
+  <div class="adm-grid">
+    <div>
+      <div class="card forecast reveal" style="animation-delay:.22s">
+        <div class="sec-h"><h2>Capacity &amp; forecast</h2><span class="tag ok">on track</span></div>
+        <div class="big num" id="forecastDate">~14 August</div>
+        <div class="lbl" id="forecastLabel">projected completion of the new syllabus (2,000 questions) at current velocity</div>
+        <div class="bar"><div id="fbar" style="background:linear-gradient(90deg,var(--primary),var(--primary-deep))"></div></div>
+        <div class="meta" id="forecastMeta"><span>0 confirmed</span><span>2,000 remaining</span></div>
+      </div>
+      <div class="card mt20 reveal" style="animation-delay:.28s">
+        <div class="sec-h"><h2>Review queue</h2><span class="tag warn" id="qtag">5 waiting</span></div>
+        <div id="queue"></div>
+      </div>
+      <div class="card mt20 reveal" style="animation-delay:.34s">
+        <div class="sec-h"><h2>Staff</h2></div>
+        <table><thead><tr><th>Person</th><th>Today</th><th>Rework</th><th>Attendance</th></tr></thead><tbody id="staffBody"></tbody></table>
+        <div class="payroll-note"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01" stroke-linecap="round"/></svg> Attendance feeds payroll only — kept separate from the performance score.</div>
+      </div>
+    </div>
+    <div>
+      <div class="card quality reveal" style="animation-delay:.24s">
+        <div class="sec-h"><h2>Quality signal</h2><span class="tag ok" id="qualityStatus">stable</span></div>
+        <div><span class="num" id="reworkRate">6.2%</span><span class="delta" id="reworkDelta">▼ 0.8</span></div>
+        <div style="font-size:13px;color:var(--ink-soft);font-weight:500;margin-top:4px">team rework / rejection rate · last 6 weeks</div>
+        <svg id="reworkSpark" class="spark" width="100%" height="70" viewBox="0 0 300 70" preserveAspectRatio="none"></svg>
+        <div style="font-size:12.5px;color:var(--ink-faint);font-weight:500">Early-warning triggers automatically above 12%.</div>
+      </div>
+      <div class="card mt20 reveal" style="animation-delay:.30s">
+        <div class="sec-h"><h2>Incentive setup</h2></div>
+        <div class="inc-row"><span style="font-size:13.5px;font-weight:600;color:var(--ink-soft)">Daily point target</span><span class="v"><span id="tgtV">50</span> pts</span></div>
+        <input type="range" id="tgt" min="30" max="80" value="50">
+        <div style="font-size:13px;color:var(--ink-soft);font-weight:500;margin:14px 0 6px">Bonus curve — smooth, no hard cliffs</div>
+        <svg width="100%" height="120" viewBox="0 0 300 120" preserveAspectRatio="none" style="background:var(--surface-2);border-radius:12px;border:1px solid var(--line)">
+          <path d="M10,108 C90,108 150,95 175,60 C205,18 250,14 290,12" fill="none" stroke="var(--primary)" stroke-width="3" stroke-linecap="round"/>
+          <path d="M10,108 C90,108 150,95 175,60 C205,18 250,14 290,12 L290,112 L10,112 Z" fill="var(--primary-soft)" opacity=".5"/>
+          <line x1="175" y1="6" x2="175" y2="112" stroke="var(--ink-faint)" stroke-width="1" stroke-dasharray="3 4" opacity=".5"/>
+        </svg>
+        <div style="display:flex;justify-content:space-between;font-size:11.5px;color:var(--ink-faint);font-weight:600;margin-top:6px"><span>0 pts</span><span>target</span><span>stretch</span></div>
+        <div class="toggle"><div class="lab">Quality gate<small>Bonus eligibility requires rework rate under 10%</small></div><button class="sw" id="gate"></button></div>
+      </div>
+      <div class="card mt20 reveal" style="animation-delay:.36s">
+        <div class="sec-h"><h2>Team feed</h2></div>
+        <div id="teamFeedWrap"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SUPER ADMIN ============ -->
+<section class="view" id="super">
+  <div class="adm-head">
+    <div>
+      <div class="role-badge" style="margin-bottom:10px">🔑 Super Admin · full control</div>
+      <h1>Configuration &amp; Analytics</h1>
+      <p>Define tasks and points, assign work, set targets &amp; levels, and generate reports.</p>
+    </div>
+    <button class="pdf" onclick="genPDF('full')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 15V3M7 10l5 5 5-5M5 21h14"/></svg> Full PDF export</button>
+  </div>
+
+  <!-- Supabase Settings Card -->
+  <div class="card reveal" style="animation-delay:.02s; margin-bottom: 20px;">
+    <div class="sec-h">
+      <h2>☁️ Supabase Cloud Database Settings</h2>
+      <span class="tag" id="dbStatusPill" style="background: var(--surface-2); color: var(--ink-soft); font-weight:700;">● Connecting…</span>
+    </div>
+    <p style="font-size:13.5px;color:var(--ink-soft);font-weight:500;margin-bottom:16px">
+      Link this workspace to a Supabase project to enable real-time sync across different browsers and devices. Leave empty to use local offline mode.
+    </p>
+    <div class="addform" style="grid-template-columns: 1.5fr 2fr auto auto; gap: 12px; border-top: none; margin-top: 0; padding-top: 0;">
+      <div>
+        <span class="mini-label">Supabase URL</span>
+        <input type="text" id="sbUrl" value="https://aanedmebrvecgeiarewx.supabase.co" placeholder="https://your-project.supabase.co" style="width: 100%;" readonly>
+      </div>
+      <div>
+        <span class="mini-label">Supabase Anon/Public Key</span>
+        <input type="password" id="sbKey" value="sb_publishable_RmG7IgrafSKDoFr6CTaRzw_uV1NKbbT" placeholder="Project anon key" style="width: 100%;" readonly>
+      </div>
+      <button class="btn sm" id="connectDbBtn" style="padding: 10px 18px;">Connect</button>
+      <button class="btn sm" id="disconnectDbBtn" style="background: var(--surface-2); color: var(--ink-soft); border: 1px solid var(--line); padding: 10px 18px; display: none;">Reload from cloud</button>
+    </div>
+  </div>
+
+  <div class="sup-grid">
+    <!-- Task library -->
+    <div class="card reveal" style="animation-delay:.05s">
+      <div class="sec-h"><h2>Task library &amp; points</h2><span class="tag ok" id="taskCount">4 tasks</span></div>
+      <p style="font-size:13px;color:var(--ink-soft);font-weight:500;margin-bottom:14px">Base points per unit. Difficulty multipliers apply on top. Changes flow straight to the staff log.</p>
+      <table class="tasktable">
+        <thead><tr><th>Task</th><th>Unit</th><th style="text-align:center">Base pts</th><th></th></tr></thead>
+        <tbody id="taskBody"></tbody>
+      </table>
+      <div class="addform">
+        <div><span class="mini-label">New task name</span><input type="text" id="ntName" placeholder="e.g. Write quiz set"></div>
+        <div><span class="mini-label">Unit</span><input type="text" id="ntUnit" placeholder="items"></div>
+        <div><span class="mini-label">Base pts</span><input type="number" id="ntPts" value="5" min="1" style="text-align:center"></div>
+        <button class="btn sm" id="addTask">+ Add</button>
+      </div>
+      <div style="margin-top:22px;padding-top:18px;border-top:1px solid var(--line)">
+        <span class="mini-label">Difficulty multipliers (global)</span>
+        <div class="cfg-row"><div class="cl">Easy</div><input type="number" step="0.1" id="mEasy" value="1.0"></div>
+        <div class="cfg-row"><div class="cl">Medium</div><input type="number" step="0.1" id="mMed" value="1.4"></div>
+        <div class="cfg-row"><div class="cl">Hard</div><input type="number" step="0.1" id="mHard" value="1.9"></div>
+      </div>
+    </div>
+
+    <!-- Assign + targets/levels -->
+    <div>
+      <div class="card reveal" style="animation-delay:.10s">
+        <div class="sec-h"><h2>Assign task to staff</h2></div>
+        <div class="field"><label>Staff member</label><select id="asgStaff"></select></div>
+        <div class="field"><label>Task</label><select id="asgTask"></select></div>
+        <div class="row2">
+          <div class="field"><label>Target qty / day</label><input type="number" id="asgQty" value="20" min="1"></div>
+          <div class="field"><label>Difficulty</label><select id="asgDiff"><option>Easy</option><option selected>Medium</option><option>Hard</option></select></div>
+        </div>
+        <button class="btn" id="assignBtn">Assign task →</button>
+        <div class="assign-list" id="assignList" style="margin-top:16px"></div>
+      </div>
+
+      <div class="card mt20 reveal" style="animation-delay:.16s">
+        <div class="sec-h"><h2>Targets &amp; levels</h2></div>
+        <div class="cfg-row"><div class="cl">Daily target points<small>Drives every staff progress ring</small></div><input type="number" id="dailyTgt" value="50"></div>
+        <div class="cfg-row"><div class="cl">Syllabus Target Goal (questions)<small>Target for capacity forecast</small></div><input type="number" id="syllabusGoal" value="2000"></div>
+        <div class="cfg-row"><div class="cl"><span class="lvl-chip"><span class="lvl-dot" style="background:var(--ink-faint)"></span>Contributor</span><small>Entry level</small></div><input type="number" id="lvlC" value="0"></div>
+        <div class="cfg-row"><div class="cl"><span class="lvl-chip"><span class="lvl-dot" style="background:var(--amber)"></span>Senior</span><small>XP to reach</small></div><input type="number" id="lvlS" value="500"></div>
+        <div class="cfg-row"><div class="cl"><span class="lvl-chip"><span class="lvl-dot"></span>Lead Contributor</span><small>XP to reach</small></div><input type="number" id="lvlL" value="1000"></div>
+        <button class="btn" id="saveCfg" style="margin-top:16px">Save configuration</button>
+        <button class="btn" id="resetData" style="margin-top:10px; background:var(--surface-2); color:var(--ink-soft); border:1.5px solid var(--line); box-shadow:none">Reset to Demo Data</button>
+        <button class="btn" id="clearData" style="margin-top:10px; background:var(--red-soft); color:var(--red); border:1.5px solid var(--red); box-shadow:none">Clear All Production Data (Start Empty)</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Users & access -->
+  <div class="card mt20 reveal" style="animation-delay:.20s">
+    <div class="sec-h"><h2>Users &amp; access</h2><span class="tag warn" id="userCount">7 accounts</span></div>
+    <p style="font-size:13px;color:var(--ink-soft);font-weight:500;margin-bottom:14px">Create accounts and set passwords. The role decides which views a person can open — staff see only their dashboard, admins the console, super admins everything.</p>
+    <table><thead><tr><th>Person</th><th>Username</th><th>Role</th><th>Password</th></tr></thead><tbody id="userBody"></tbody></table>
+    <div class="addform" style="grid-template-columns:1.3fr 1fr .9fr 1fr auto">
+      <div><span class="mini-label">Full name</span><input type="text" id="nuName" placeholder="e.g. Priya S"></div>
+      <div><span class="mini-label">Username</span><input type="text" id="nuUser" placeholder="priya"></div>
+      <div><span class="mini-label">Role</span><select id="nuRole"><option value="staff">Staff</option><option value="admin">Admin</option></select></div>
+      <div><span class="mini-label">Password</span><input type="text" id="nuPass" placeholder="set password"></div>
+      <button class="btn sm" id="addUserBtn">+ Create</button>
+    </div>
+    <div class="payroll-note"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg> Prototype auth — credentials live in the browser only. For production, move authentication and password hashing to a server.</div>
+  </div>
+
+  <!-- Analytics -->
+  <div class="card mt20 reveal" style="animation-delay:.22s">
+    <div class="sec-h"><h2>Analytics</h2><div class="seg" id="anSeg"><button class="on">8 weeks</button><button>Quarter</button><button>Year</button></div></div>
+    <div class="an-grid">
+      <div>
+        <div class="barlbl" style="margin-bottom:6px">Confirmed output per week</div>
+        <svg id="trend" width="100%" height="210" viewBox="0 0 560 210" preserveAspectRatio="none"></svg>
+      </div>
+      <div>
+        <div class="barlbl" style="margin-bottom:14px">Output mix · this month</div>
+        <div id="outputMixWrap"></div>
+        <div style="margin-top:22px"><div class="barlbl" style="margin-bottom:12px">Top contributors · points this month</div>
+          <svg id="contrib" width="100%" height="150" viewBox="0 0 560 150" preserveAspectRatio="none"></svg>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reports -->
+  <div class="card mt20 reveal" style="animation-delay:.28s">
+    <div class="sec-h"><h2>Generate reports</h2></div>
+    <p style="font-size:13.5px;color:var(--ink-soft);font-weight:500;margin-bottom:16px">Branded PDF summaries — pick a range, download instantly.</p>
+    <div class="report">
+      <div class="seg" id="repSeg"><button class="on" data-r="Daily">Daily</button><button data-r="Weekly">Weekly</button><button data-r="Monthly">Monthly</button><button data-r="Yearly">Yearly</button></div>
+      <button class="btn sm" style="margin-left:auto" onclick="genPDF('range')"><span style="display:inline-flex;align-items:center;gap:8px"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><path d="M14 3v5h5"/><path d="M9 13h6M9 17h6M14 3H6v18h12V8z"/></svg>Generate PDF</span></button>
+    </div>
+  </div>
+</section>
+
+<div id="printArea"></div>
+<div id="toast"></div>
+<canvas id="confetti"></canvas>
+
+<script>
+let sbClient = null;
+
+/* ===== HARD-CODED CLOUD CREDENTIALS =====
+   The app is now FULLY ONLINE. There is no local storage anywhere:
+   every read and write goes to Supabase. These constants are the
+   single source of the connection — change them here only.        */
+const SUPABASE_URL = "https://aanedmebrvecgeiarewx.supabase.co";
+const SUPABASE_KEY = "sb_publishable_RmG7IgrafSKDoFr6CTaRzw_uV1NKbbT";
+
+document.addEventListener('DOMContentLoaded', () => {
+  // Just reflect the live connection target in the Super Admin panel (read-only feel).
+  const u = document.getElementById('sbUrl');
+  const k = document.getElementById('sbKey');
+  if (u) u.value = SUPABASE_URL;
+  if (k) k.value = SUPABASE_KEY;
+});
+
+/* ---- view switch + theme ---- */
+document.querySelectorAll('.switch button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('.switch button').forEach(x=>x.classList.remove('active'));b.classList.add('active');
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.getElementById(b.dataset.view).classList.add('active');
+  if(b.dataset.view==='super')drawAnalytics();
+  if(b.dataset.view==='admin')renderAdminDashboard();
+  if(b.dataset.view==='staff') {
+    const targetName = (currentUser && currentUser.role === 'staff') ? currentUser.name : 'Anjana R';
+    syncStaffView(targetName);
+  }
+});
+document.getElementById('theme').onclick=()=>document.body.classList.toggle('dark');
+let tT;function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(tT);tT=setTimeout(()=>t.classList.remove('show'),2800);}
+function countUp(el,to,dur=1100,suf=''){const s=parseFloat((el.textContent||'0').replace(/[,%]/g,''))||0;const t0=performance.now();(function st(n){const p=Math.min((n-t0)/dur,1),e=1-Math.pow(1-p,3);el.textContent=Math.round(s+(to-s)*e).toLocaleString()+suf;if(p<1)requestAnimationFrame(st);})(t0);}
+
+/* ===== SHARED CONFIG (single source of truth) ===== */
+let taskConfig=[
+  {id:'q',label:'Add questions to question bank',unit:'questions',base:2,ico:'❓'},
+  {id:'v',label:'Edit explainer video',unit:'videos',base:14,ico:'🎬'},
+  {id:'l',label:'Build full lesson',unit:'lessons',base:34,ico:'📚'},
+  {id:'r',label:'Review peer content',unit:'items',base:4,ico:'🔍'}
+];
+let tiers={Easy:1.0,Medium:1.4,Hard:1.9};
+let TARGET=50, leadXP=1000, currentXP=0, SYLLABUS_GOAL=2000, lvlC=0, lvlS=500, lvlL=1000;
+let staff=[
+  {n:'Anjana R',in:'AR',role:'Senior writer',today:0,rew:'0%',att:'out',month:0,streak:0},
+  {n:'Rahul Menon',in:'RM',role:'Video editor',today:0,rew:'0%',att:'out',month:0,streak:0},
+  {n:'Meera Pillai',in:'MP',role:'Lead contributor',today:0,rew:'0%',att:'out',month:0,streak:0},
+  {n:'Sanjay Das',in:'SD',role:'Lesson builder',today:0,rew:'0%',att:'out',month:0,streak:0},
+  {n:'Fathima K',in:'FK',role:'Reviewer',today:0,rew:'0%',att:'out',month:0,streak:0}
+];
+let outputMix = { q: 0, v: 0, l: 0, r: 0 };
+let weeklyTrend = [0, 0, 0, 0, 0, 0, 0, 0];
+let baselines = { q: 0, v: 0, l: 0, vel: 0 };
+let activeVelocity = 0;
+let reworkTrend = [0, 0, 0, 0, 0, 0];
+let teamFeed = [];
+let studentImpact = {
+  attempts: 0,
+  firstTry: 0,
+  delta: 0,
+  reached: 0
+};
+
+/* ===== STAFF: dropdown + tiers driven by config ===== */
+let selTask=(taskConfig[0] ? taskConfig[0].id : ''), selMult=tiers.Medium, selDiff='Medium';
+function renderTaskDropdown(){
+  document.getElementById('task').innerHTML=taskConfig.map(t=>`<option value="${t.id}">${t.label}</option>`).join('');
+  document.getElementById('task').value=taskConfig.find(t=>t.id===selTask)?selTask:(selTask=(taskConfig[0] ? taskConfig[0].id : ''));
+}
+function renderTiers(){
+  document.getElementById('tierWrap').innerHTML=Object.entries(tiers).map(([k,v])=>
+    `<div class="tier ${k===selDiff?'sel':''}" data-k="${k}" data-m="${v}">${k}<span class="mult">×${v.toFixed(1)}</span></div>`).join('');
+  document.querySelectorAll('#tierWrap .tier').forEach(t=>t.onclick=()=>{
+    document.querySelectorAll('#tierWrap .tier').forEach(x=>x.classList.remove('sel'));t.classList.add('sel');
+    selMult=parseFloat(t.dataset.m);selDiff=t.dataset.k;recalc();});
+}
+function recalc(){const t=taskConfig.find(x=>x.id===document.getElementById('task').value);const q=Math.max(1,parseInt(document.getElementById('qty').value)||0);document.getElementById('calc').textContent=t ? Math.round(t.base*q*selMult) : 0;}
+document.getElementById('task').onchange=e=>{selTask=e.target.value;recalc();};
+document.getElementById('qty').oninput=recalc;
+
+let confirmed=0,provisional=0;const R=100,CIRC=2*Math.PI*R;
+function setRing(){document.getElementById('ring').style.strokeDashoffset=CIRC*(1-Math.min(confirmed/TARGET,1));}
+let ship=[];
+function chip(st){const m={prov:['prov','Provisional'],conf:['conf','Confirmed'],rew:['rew','Needs rework']};return `<span class="chip ${m[st][0]}"><span class="dot"></span>${m[st][1]}</span>`;}
+function renderShip(){
+  const mine = currentUser ? ship.filter(i => i.user === currentUser.name) : [];
+  if (!mine.length) {
+    document.getElementById('shipList').innerHTML = '<div class="empty">No items shipped today.</div>';
+    return;
+  }
+  document.getElementById('shipList').innerHTML=mine.map(i=>`<div class="logitem"><span class="ico">${i.ico}</span><div class="meta"><div class="t">${i.t}</div><div class="s">${i.s}</div></div>${chip(i.st)}<span class="pts num">+${i.pts}</span></div>`).join('');
+}
+document.getElementById('logBtn').onclick=async ()=>{
+  const t=taskConfig.find(x=>x.id===document.getElementById('task').value);
+  const q=Math.max(1,parseInt(document.getElementById('qty').value)||0);const pts=Math.round(t.base*q*selMult);
+  const logId = 'log_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+  const item={id:logId,ico:t.ico,t:t.label,s:`${q} ${t.unit} · ${selDiff}`,pts,st:'prov',user:currentUser.name,date:new Date().toISOString(),taskId:t.id,qty:q};
+  ship.unshift(item);renderShip();provisional+=pts;document.getElementById('provN').textContent=provisional;
+  toast(`Logged +${pts} provisional points — sent to Review Queue`);
+  
+  // Sync provisional points back to staff list
+  const rec = staff.find(s => s.n === currentUser.name);
+  if (rec) rec.provisional = provisional;
+  
+  // Add task to Admin's Review Queue
+  const queueItem = {
+    id: logId,
+    n: currentUser.name,
+    in: currentUser.in,
+    d: `${t.label} — ${q} ${t.unit} · ${selDiff}`,
+    p: pts
+  };
+  queue.push(queueItem);
+  
+  renderQueue();
+  saveState();
+
+  if (sbClient) {
+    try {
+      const { error: logErr } = await sbClient.from('ship_logs').insert({
+        id: item.id,
+        ico: item.ico,
+        t: item.t,
+        s: item.s,
+        pts: item.pts,
+        st: item.st,
+        user_name: item.user,
+        date: item.date,
+        task_id: item.taskId,
+        qty: item.qty
+      });
+      if (logErr) throw logErr;
+
+      const { error: qErr } = await sbClient.from('review_queue').insert({
+        id: queueItem.id,
+        n: queueItem.n,
+        in: queueItem.in,
+        d: queueItem.d,
+        p: queueItem.p,
+        log_id: queueItem.id
+      });
+      if (qErr) throw qErr;
+
+      if (rec) {
+        await pushStaffScoreToSupabase(rec);
+      }
+    } catch (e) {
+      console.error('Supabase log push failed:', e);
+      toast('⚠️ Cloud save failed: ' + e.message);
+    }
+  }
+};
+
+/* assignment banner on staff dash */
+let assignments=[];
+function renderAssignBanner(){
+  const mine=assignments.filter(a=>a.staff===bannerName);
+  document.getElementById('assignBanner').innerHTML=mine.length?
+    `<div class="reveal" style="margin-top:18px">`+mine.map(a=>`<div class="assigned"><span class="pin">📌</span><div><div class="at">Assigned: ${a.taskLabel}</div><div class="ad">Target ${a.qty}/day · ${a.diff} · assigned by Super Admin</div></div></div>`).join('')+`</div>`:'';
+}
+
+/* ===== ADMIN review queue / staff table ===== */
+let queue=[];
+
+function confirmQueueItem(desc, pts) {
+  let qty = 0;
+  let typeId = '';
+  const numMatch = desc.match(/(\d+)/);
+  if (numMatch) {
+    qty = parseInt(numMatch[1]);
+  } else {
+    qty = 1;
+  }
+  const dLower = desc.toLowerCase();
+  if (dLower.includes('question')) {
+    typeId = 'q';
+  } else if (dLower.includes('video') || dLower.includes('explainer')) {
+    typeId = 'v';
+  } else if (dLower.includes('lesson')) {
+    typeId = 'l';
+  } else if (dLower.includes('review') || dLower.includes('peer')) {
+    typeId = 'r';
+  }
+  if (typeId) {
+    if (outputMix[typeId] !== undefined) {
+      outputMix[typeId] += qty;
+    } else {
+      outputMix[typeId] = qty;
+    }
+    weeklyTrend[weeklyTrend.length - 1] = (weeklyTrend[weeklyTrend.length - 1] || 0) + qty;
+    updateActiveVelocity();
+  }
+}
+
+function renderQueue(){
+  const q=document.getElementById('queue');document.getElementById('qtag').textContent=queue.length+' waiting';
+  if(!queue.length){q.innerHTML='<div class="empty">All caught up — queue is clear ✓</div>';return;}
+  q.innerHTML=queue.map((i,x)=>`<div class="qitem"><span class="av">${i.in}</span><div class="info"><div class="a">${i.n} <span style="color:var(--primary);font-weight:700">+${i.p}</span></div><div class="b">${i.d}</div></div><div class="acts"><button class="qbtn app" data-x="${x}" data-act="a"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg></button><button class="qbtn rej" data-x="${x}" data-act="r"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div></div>`).join('');
+  q.querySelectorAll('.qbtn').forEach(b=>b.onclick=async ()=>{
+    const idx = +b.dataset.x;
+    const act = b.dataset.act;
+    const i = queue[idx];
+    let sRec = null;
+    let shipItem = null;
+    
+    if (act === 'a') {
+      toast(`Confirmed ${i.n}'s points (+${i.p})`);
+      confirmQueueItem(i.d, i.p);
+      sRec = staff.find(s => s.n === i.n);
+      if (sRec) {
+        sRec.today = (sRec.today || 0) + i.p;
+        sRec.month = (sRec.month || 0) + i.p;
+        sRec.provisional = Math.max(0, (sRec.provisional || 0) - i.p);
+        renderStaffTable();
+      }
+      if (currentUser && currentUser.name === i.n) {
+        provisional = Math.max(0, provisional - i.p);
+      }
+      shipItem = ship.find(s => s.id === i.id || (s.user === i.n && s.pts === i.p && s.st === 'prov'));
+      if (shipItem) {
+        shipItem.st = 'conf';
+      }
+      renderAdminDashboard();
+    } else {
+      toast(`Sent ${i.n}'s item back for rework`);
+      sRec = staff.find(s => s.n === i.n);
+      if (sRec) {
+        sRec.rew = (parseInt(sRec.rew) + 1) + '%';
+        sRec.provisional = Math.max(0, (sRec.provisional || 0) - i.p);
+        renderStaffTable();
+      }
+      if (currentUser && currentUser.name === i.n) {
+        provisional = Math.max(0, provisional - i.p);
+      }
+      shipItem = ship.find(s => s.id === i.id || (s.user === i.n && s.pts === i.p && s.st === 'prov'));
+      if (shipItem) {
+        shipItem.st = 'rew';
+      }
+    }
+    queue.splice(idx, 1);
+    renderQueue();
+    saveState();
+
+    if (sbClient) {
+      try {
+        const { error: delErr } = await sbClient.from('review_queue').delete().eq('id', i.id);
+        if (delErr) throw delErr;
+
+        if (shipItem) {
+          const { error: shipErr } = await sbClient.from('ship_logs').update({ st: shipItem.st }).eq('id', shipItem.id);
+          if (shipErr) throw shipErr;
+        }
+
+        if (sRec) {
+          await pushStaffScoreToSupabase(sRec);
+        }
+
+        if (act === 'a') {
+          await pushSettingsToSupabase();
+        }
+      } catch (e) {
+        console.error('Supabase queue update failed:', e);
+        toast('⚠️ Cloud update failed: ' + e.message);
+      }
+    }
+  });
+}
+function renderStaffTable(){
+  document.getElementById('staffBody').innerHTML=staff.map(s=>`<tr><td><div class="who"><span class="av">${s.in}</span><div>${s.n}<div class="role">${s.role}</div></div></div></td><td><b class="num">${s.today}</b> <span style="color:var(--ink-faint);font-size:12px">pts</span></td><td style="color:${parseInt(s.rew)>10?'var(--amber)':'var(--ink-soft)'};font-weight:600">${s.rew}</td><td><span class="att ${s.att}">${s.att==='in'?'● Clocked in':'○ Clocked out'}</span></td></tr>`).join('');
+}
+document.getElementById('tgt').oninput=e=>{
+  const val = parseInt(e.target.value) || 50;
+  document.getElementById('tgtV').textContent=val;
+  TARGET = val;
+  if (document.getElementById('dailyTgt')) document.getElementById('dailyTgt').value = TARGET;
+  if (document.getElementById('tgtRing')) document.getElementById('tgtRing').textContent = TARGET;
+  setRing();
+};
+document.getElementById('tgt').onchange=()=>{
+  saveState();
+};
+document.getElementById('gate').onclick=function(){this.classList.toggle('off');toast(this.classList.contains('off')?'Quality gate off':'Quality gate on — rework under 10%');};
+
+/* ===== SUPER ADMIN ===== */
+function renderTaskTable(){
+  document.getElementById('taskCount').textContent=taskConfig.length+' tasks';
+  document.getElementById('taskBody').innerHTML=taskConfig.map((t,i)=>`<tr>
+    <td><span style="margin-right:8px">${t.ico}</span>${t.label}</td>
+    <td style="color:var(--ink-faint)">${t.unit}</td>
+    <td style="text-align:center"><input class="pts-in" type="number" min="1" value="${t.base}" data-i="${i}"></td>
+    <td style="text-align:right"><button class="del" data-i="${i}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg></button></td></tr>`).join('');
+  document.querySelectorAll('#taskBody .pts-in').forEach(inp=>inp.onchange=()=>{taskConfig[+inp.dataset.i].base=Math.max(1,parseInt(inp.value)||1);renderTaskDropdown();recalc();drawAnalytics();toast('Points updated — live on staff log');saveState();});
+  document.querySelectorAll('#taskBody .del').forEach(b=>b.onclick=()=>{if(taskConfig.length<=1)return toast('Keep at least one task');const r=taskConfig.splice(+b.dataset.i,1)[0];refreshTaskEverywhere();toast(`Removed "${r.label}"`);saveState();});
+}
+function refreshTaskEverywhere(){renderTaskTable();renderTaskDropdown();renderAsgTask();recalc();}
+document.getElementById('addTask').onclick=()=>{
+  const name=document.getElementById('ntName').value.trim();const unit=document.getElementById('ntUnit').value.trim()||'items';
+  const pts=Math.max(1,parseInt(document.getElementById('ntPts').value)||1);
+  if(!name)return toast('Enter a task name');
+  taskConfig.push({id:'t'+Date.now(),label:name,unit,base:pts,ico:'✏️'});
+  document.getElementById('ntName').value='';document.getElementById('ntUnit').value='';document.getElementById('ntPts').value=5;
+  refreshTaskEverywhere();toast(`Added "${name}" (${pts} pts/${unit})`);
+  saveState();
+};
+['mEasy','mMed','mHard'].forEach((id,i)=>document.getElementById(id).onchange=e=>{
+  const k=['Easy','Medium','Hard'][i];tiers[k]=Math.max(0.1,parseFloat(e.target.value)||1);
+  if(selDiff===k)selMult=tiers[k];renderTiers();recalc();toast(`${k} multiplier → ×${tiers[k].toFixed(1)}`);
+  saveState();
+});
+
+/* assignment */
+function fillStaffSelect(){document.getElementById('asgStaff').innerHTML=staff.map(s=>`<option>${s.n}</option>`).join('');}
+function renderAsgTask(){document.getElementById('asgTask').innerHTML=taskConfig.map(t=>`<option value="${t.id}">${t.label}</option>`).join('');}
+function renderAssignList(){
+  const el=document.getElementById('assignList');
+  el.innerHTML=assignments.length?assignments.slice().reverse().map(a=>`<div class="qitem"><span class="av">${a.in}</span><div class="info"><div class="a">${a.staff}</div><div class="b">${a.taskLabel} · ${a.qty}/day · ${a.diff}</div></div></div>`).join(''):'<div class="empty" style="padding:18px 0">No active assignments yet</div>';
+}
+document.getElementById('assignBtn').onclick=async ()=>{
+  const sName=document.getElementById('asgStaff').value;const s=staff.find(x=>x.n===sName);
+  const t=taskConfig.find(x=>x.id===document.getElementById('asgTask').value);
+  const qty=Math.max(1,parseInt(document.getElementById('asgQty').value)||1);const diff=document.getElementById('asgDiff').value;
+  const newAsg = {staff:sName,in:s.in,taskLabel:t.label,qty,diff};
+  assignments.push(newAsg);
+  renderAssignList();renderAssignBanner();toast(`Assigned "${t.label}" to ${sName}`);
+  saveState();
+
+  if (sbClient) {
+    try {
+      const { error } = await sbClient.from('assignments').insert({
+        staff_name: newAsg.staff,
+        in: newAsg.in,
+        task_label: newAsg.taskLabel,
+        qty: newAsg.qty,
+        difficulty: newAsg.diff
+      });
+      if (error) throw error;
+    } catch (e) {
+      console.error('Supabase assignment push failed:', e);
+      toast('⚠️ Cloud save failed: ' + e.message);
+    }
+  }
+};
+
+/* targets & levels */
+document.getElementById('saveCfg').onclick=()=>{
+  TARGET=Math.max(1,parseInt(document.getElementById('dailyTgt').value)||50);
+  lvlC=Math.max(0,parseInt(document.getElementById('lvlC').value)||0);
+  lvlS=Math.max(1,parseInt(document.getElementById('lvlS').value)||500);
+  lvlL=Math.max(2,parseInt(document.getElementById('lvlL').value)||1000);
+  leadXP=lvlL;
+  SYLLABUS_GOAL=Math.max(1,parseInt(document.getElementById('syllabusGoal').value)||2000);
+  document.getElementById('tgtRing').textContent=TARGET;
+  document.getElementById('tgtV').textContent=TARGET;document.getElementById('tgt').value=Math.min(80,Math.max(30,TARGET));
+  const elLeadXP = document.getElementById('leadXP');
+  if (elLeadXP) elLeadXP.textContent=leadXP.toLocaleString();
+  const elToLead = document.getElementById('toLead');
+  if (elToLead) elToLead.textContent=Math.max(0,leadXP-currentXP).toLocaleString();
+  const elXpBar = document.getElementById('xpbar');
+  if (elXpBar) elXpBar.style.width=Math.min(100,currentXP/leadXP*100)+'%';
+  setRing();
+  renderAdminDashboard();
+  renderGrowthCard();
+  toast('Configuration saved — staff dashboards & goal updated');
+  saveState();
+};
+document.getElementById('resetData').onclick=async ()=>{
+  if (confirm("Are you sure you want to reset all data back to the default state? This will restore the pre-populated mock statistics, tasks, and staff logs.")) {
+    const demoState = {
+      taskConfig: [
+        {id:'q',label:'Add questions to question bank',unit:'questions',base:2,ico:'❓'},
+        {id:'v',label:'Edit explainer video',unit:'videos',base:14,ico:'🎬'},
+        {id:'l',label:'Build full lesson',unit:'lessons',base:34,ico:'📚'},
+        {id:'r',label:'Review peer content',unit:'items',base:4,ico:'🔍'}
+      ],
+      tiers: {Easy:1.0,Medium:1.4,Hard:1.9},
+      TARGET: 50,
+      leadXP: 1000,
+      currentXP: 680,
+      staff: [
+        {n:'Anjana R',in:'AR',role:'Senior writer',today:42,rew:'4%',att:'in',month:1240,streak:12},
+        {n:'Rahul Menon',in:'RM',role:'Video editor',today:51,rew:'6%',att:'in',month:1080,streak:30},
+        {n:'Meera Pillai',in:'MP',role:'Lead contributor',today:38,rew:'2%',att:'in',month:1460,streak:5},
+        {n:'Sanjay Das',in:'SD',role:'Lesson builder',today:29,rew:'11%',att:'out',month:760,streak:0},
+        {n:'Fathima K',in:'FK',role:'Reviewer',today:34,rew:'5%',att:'in',month:910,streak:8}
+      ],
+      ship: [
+        // Anjana R (1240 pts month)
+        {ico:'❓',t:'Add questions to question bank',s:'250 questions · Medium',pts:700,st:'conf',user:'Anjana R',date:new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),taskId:'q',qty:250},
+        {ico:'🎬',t:'Edit explainer video',s:'10 videos · Hard',pts:266,st:'conf',user:'Anjana R',date:new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),taskId:'v',qty:10},
+        {ico:'📚',t:'Build full lesson',s:'5 lessons · Medium',pts:238,st:'conf',user:'Anjana R',date:new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),taskId:'l',qty:5},
+        {ico:'🔍',t:'Review peer content',s:'9 items · Easy',pts:36,st:'conf',user:'Anjana R',date:new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString(),taskId:'r',qty:9},
+        {ico:'🎬',t:'Edit explainer video',s:'2 videos · Hard',pts:53,st:'prov',user:'Anjana R',date:new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),taskId:'v',qty:2},
+        {ico:'📚',t:'Build full lesson',s:'1 lesson · Medium',pts:48,st:'rew',user:'Anjana R',date:new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),taskId:'l',qty:1},
+        
+        // Meera Pillai (1460 pts month)
+        {ico:'❓',t:'Add questions to question bank',s:'250 questions · Medium',pts:700,st:'conf',user:'Meera Pillai',date:new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),taskId:'q',qty:250},
+        {ico:'🎬',t:'Edit explainer video',s:'5 videos · Hard',pts:133,st:'conf',user:'Meera Pillai',date:new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),taskId:'v',qty:5},
+        {ico:'📚',t:'Build full lesson',s:'12 lessons · Medium',pts:571,st:'conf',user:'Meera Pillai',date:new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),taskId:'l',qty:12},
+        {ico:'🔍',t:'Review peer content',s:'14 items · Easy',pts:56,st:'conf',user:'Meera Pillai',date:new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),taskId:'r',qty:14},
+
+        // Rahul Menon (1080 pts month)
+        {ico:'❓',t:'Add questions to question bank',s:'200 questions · Medium',pts:560,st:'conf',user:'Rahul Menon',date:new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),taskId:'q',qty:200},
+        {ico:'🎬',t:'Edit explainer video',s:'15 videos · Medium',pts:294,st:'conf',user:'Rahul Menon',date:new Date(Date.now() - 4 * 24 * 60 * 60 * 1000).toISOString(),taskId:'v',qty:15},
+        {ico:'📚',t:'Build full lesson',s:'4 lessons · Medium',pts:190,st:'conf',user:'Rahul Menon',date:new Date(Date.now() - 6 * 24 * 60 * 60 * 1000).toISOString(),taskId:'l',qty:4},
+        {ico:'🔍',t:'Review peer content',s:'9 items · Easy',pts:36,st:'conf',user:'Rahul Menon',date:new Date(Date.now() - 12 * 24 * 60 * 60 * 1000).toISOString(),taskId:'r',qty:9},
+
+        // Sanjay Das (760 pts month)
+        {ico:'❓',t:'Add questions to question bank',s:'150 questions · Medium',pts:420,st:'conf',user:'Sanjay Das',date:new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),taskId:'q',qty:150},
+        {ico:'🎬',t:'Edit explainer video',s:'5 videos · Medium',pts:98,st:'conf',user:'Sanjay Das',date:new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),taskId:'v',qty:5},
+        {ico:'📚',t:'Build full lesson',s:'5 lessons · Medium',pts:238,st:'conf',user:'Sanjay Das',date:new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString(),taskId:'l',qty:5},
+        {ico:'🔍',t:'Review peer content',s:'1 item · Easy',pts:4,st:'conf',user:'Sanjay Das',date:new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),taskId:'r',qty:1},
+
+        // Fathima K (910 pts month)
+        {ico:'❓',t:'Add questions to question bank',s:'100 questions · Medium',pts:280,st:'conf',user:'Fathima K',date:new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),taskId:'q',qty:100},
+        {ico:'🎬',t:'Edit explainer video',s:'10 videos · Medium',pts:196,st:'conf',user:'Fathima K',date:new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),taskId:'v',qty:10},
+        {ico:'📚',t:'Build full lesson',s:'8 lessons · Medium',pts:381,st:'conf',user:'Fathima K',date:new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),taskId:'l',qty:8},
+        {ico:'🔍',t:'Review peer content',s:'13 items · Easy',pts:53,st:'conf',user:'Fathima K',date:new Date(Date.now() - 9 * 24 * 60 * 60 * 1000).toISOString(),taskId:'r',qty:13}
+      ],
+      assignments: [],
+      queue: [
+        {n:'Rahul Menon',in:'RM',d:'Added 18 questions · Hard',p:51},
+        {n:'Meera Pillai',in:'MP',d:'Edited explainer video · Medium',p:20},
+        {n:'Sanjay Das',in:'SD',d:'Built full lesson · Easy',p:34},
+        {n:'Fathima K',in:'FK',d:'Reviewed peer content · Medium',p:17},
+        {n:'Arun Nair',in:'AN',d:'Added 30 questions · Medium',p:84}
+      ],
+      users: [
+        {name:'Super Admin',username:'super',role:'super',password:'Super@2026',in:'SA'},
+        {name:'Tella Admin',username:'admin',role:'admin',password:'Admin@2026',in:'TA'},
+        {name:'Anjana R',username:'anjana',role:'staff',password:'Staff@2026',in:'AR'},
+        {name:'Rahul Menon',username:'rahul',role:'staff',password:'Staff@2026',in:'RM'},
+        {name:'Meera Pillai',username:'meera',role:'staff',password:'Staff@2026',in:'MP'},
+        {name:'Sanjay Das',username:'sanjay',role:'staff',password:'Staff@2026',in:'SD'},
+        {name:'Fathima K',username:'fathima',role:'staff',password:'Staff@2026',in:'FK'}
+      ],
+      confirmed: 42,
+      provisional: 0,
+      outputMix: { q: 1284, v: 96, l: 41, r: 418 },
+      weeklyTrend: [180, 210, 240, 205, 260, 290, 275, 312],
+      activeVelocity: 312,
+      reworkTrend: [5.6, 6.1, 5.8, 6.4, 6.0, 6.2],
+      teamFeed: [
+        { bubble: '🎉', text: '<b>Anjana</b> hit a new personal best — 64 points yesterday', when: '2 hours ago' },
+        { bubble: '🔥', text: '<b>Rahul</b> reached a 30-day logging streak', when: '5 hours ago' },
+        { bubble: '⭐', text: '<b>Meera</b> promoted to Lead Contributor', when: 'Yesterday' },
+        { bubble: '📈', text: 'Team rework rate dropped below 7% — quality milestone', when: '2 days ago' }
+      ],
+      studentImpact: {
+        attempts: 12340,
+        firstTry: 78,
+        delta: 9,
+        reached: 3210
+      },
+      baselines: { q: 1150, v: 89, l: 42, vel: 297 }
+    };
+    if (sbClient) {
+      await pushDemoStateToSupabase(demoState);
+    } else {
+      toast('⚠️ Not connected to cloud — cannot reset.');
+      return;
+    }
+    window.location.reload();
+  }
+};
+document.getElementById('clearData').onclick=async ()=>{
+  if (confirm("Are you sure you want to clear all production data? This will zero out all analytics, empty the review queue, delete all ship logs, and reset all staff points/stats.")) {
+    confirmed = 0;
+    provisional = 0;
+    currentXP = 0;
+    ship = [];
+    queue = [];
+    assignments = [];
+    
+    staff.forEach(s => {
+      s.today = 0;
+      s.month = 0;
+      s.provisional = 0;
+      s.rew = '0%';
+      s.att = 'out';
+      s.streak = 0;
+    });
+
+    outputMix = { q: 0, v: 0, l: 0, r: 0 };
+    weeklyTrend = [0, 0, 0, 0, 0, 0, 0, 0];
+    baselines = { q: 0, v: 0, l: 0, vel: 0 };
+    activeVelocity = 0;
+    reworkTrend = [0, 0, 0, 0, 0, 0];
+    teamFeed = [];
+    studentImpact = { attempts: 0, firstTry: 0, delta: 0, reached: 0 };
+    const attEl = document.getElementById('att');
+    if (attEl) attEl.textContent = '0';
+
+    saveState();
+    
+    if (currentUser && currentUser.role === 'staff') {
+      const rec = staff.find(s => s.n === currentUser.name);
+      if (rec) {
+        confirmed = 0;
+        provisional = 0;
+      }
+      document.getElementById('cpts').textContent = '0';
+      document.getElementById('provN').textContent = '0';
+      setRing();
+    }
+
+    if (sbClient) {
+      try {
+        toast('Clearing cloud database tables...');
+        await sbClient.from('ship_logs').delete().neq('id', 'placeholder');
+        await sbClient.from('review_queue').delete().neq('id', 'placeholder');
+        await sbClient.from('assignments').delete().gt('id', 0);
+        
+        await pushSettingsToSupabase();
+        
+        for (const s of staff) {
+          await pushStaffScoreToSupabase(s);
+        }
+        toast('✅ Cloud database cleared!');
+      } catch (e) {
+        console.error('Supabase clear failed:', e);
+        toast('⚠️ Cloud clear failed: ' + e.message);
+      }
+    }
+
+    renderShip();
+    renderQueue();
+    renderStaffTable();
+    renderAssignList();
+    renderAssignBanner();
+    renderAdminDashboard();
+    drawAnalytics();
+    renderGrowthCard();
+    syncStaffView(currentUser ? currentUser.name : 'Anjana R');
+    toast('All production data cleared!');
+  }
+};
+
+/* ===== ANALYTICS CHARTS ===== */
+function updateActiveVelocity() {
+  const lastWeeks = weeklyTrend.slice(-4);
+  const sum = lastWeeks.reduce((a, b) => a + b, 0);
+  activeVelocity = Math.round(sum / Math.max(1, lastWeeks.length));
+}
+
+function renderTrendText(elId, current, baseline, suffix = 'vs last month') {
+  const el = document.getElementById(elId);
+  if (!el) return;
+  if (baseline <= 0) {
+    if (current > 0) {
+      el.className = 'trend up';
+      el.innerHTML = `▲ 100% <span class="wk">${suffix}</span>`;
+    } else {
+      el.className = 'trend';
+      el.innerHTML = `<span class="wk">No change</span>`;
+    }
+    return;
+  }
+  const pct = ((current - baseline) / baseline) * 100;
+  const absPct = Math.round(Math.abs(pct));
+  if (pct >= 0) {
+    el.className = 'trend up';
+    el.innerHTML = `▲ ${absPct}% <span class="wk">${suffix}</span>`;
+  } else {
+    el.className = 'trend dn';
+    el.innerHTML = `▼ ${absPct}% <span class="wk">${suffix}</span>`;
+  }
+}
+
+function renderAdminDashboard() {
+  const qVal = outputMix.q || 0;
+  const vVal = outputMix.v || 0;
+  const lVal = outputMix.l || 0;
+  const velVal = activeVelocity || 0;
+
+  const elQ = document.getElementById('statQ');
+  const elV = document.getElementById('statV');
+  const elL = document.getElementById('statL');
+  const elVel = document.getElementById('statVel');
+
+  if (elQ) elQ.textContent = qVal.toLocaleString();
+  if (elV) elV.textContent = vVal.toLocaleString();
+  if (elL) elL.textContent = lVal.toLocaleString();
+  if (elVel) elVel.innerHTML = velVal.toLocaleString() + '<small style="font-size:16px;color:var(--ink-faint)">/wk</small>';
+
+  const baseDate = new Date(2026, 5, 8);
+  const remaining = Math.max(0, SYLLABUS_GOAL - qVal);
+  
+  const elDate = document.getElementById('forecastDate');
+  const elLabel = document.getElementById('forecastLabel');
+  const elFbar = document.getElementById('fbar');
+  const elFbarMeta = document.getElementById('forecastMeta');
+
+  if (qVal >= SYLLABUS_GOAL) {
+    if (elDate) elDate.textContent = 'Completed';
+    if (elLabel) elLabel.textContent = `the syllabus target of ${SYLLABUS_GOAL.toLocaleString()} questions has been fully achieved!`;
+    if (elFbar) elFbar.style.width = '100%';
+    if (elFbarMeta) elFbarMeta.innerHTML = `<span>${qVal.toLocaleString()} confirmed</span><span>0 remaining</span>`;
+  } else if (velVal <= 0) {
+    if (elDate) elDate.textContent = 'Never';
+    if (elLabel) elLabel.textContent = `no active velocity to project completion of the new syllabus (${SYLLABUS_GOAL.toLocaleString()} questions)`;
+    if (elFbar) elFbar.style.width = '0%';
+    if (elFbarMeta) elFbarMeta.innerHTML = `<span>${qVal.toLocaleString()} confirmed</span><span>${remaining.toLocaleString()} remaining</span>`;
+  } else {
+    const weeksNeeded = remaining / velVal;
+    const daysNeeded = Math.ceil(weeksNeeded * 7);
+    const targetDate = new Date(baseDate);
+    targetDate.setDate(baseDate.getDate() + daysNeeded);
+
+    const options = { day: 'numeric', month: 'long' };
+    const dateStr = targetDate.toLocaleDateString('en-GB', options);
+    const yearStr = targetDate.getFullYear() !== 2026 ? ` ${targetDate.getFullYear()}` : '';
+    
+    if (elDate) elDate.textContent = `~${dateStr}${yearStr}`;
+    if (elLabel) elLabel.textContent = `projected completion of the new syllabus (${SYLLABUS_GOAL.toLocaleString()} questions) at current velocity`;
+    const pct = Math.min(100, Math.max(0, (qVal / SYLLABUS_GOAL) * 100));
+    if (elFbar) elFbar.style.width = pct + '%';
+    if (elFbarMeta) elFbarMeta.innerHTML = `<span>${qVal.toLocaleString()} confirmed</span><span>${remaining.toLocaleString()} remaining</span>`;
+  }
+
+  const elStaffCount = document.getElementById('activeStaffCount');
+  if (elStaffCount) elStaffCount.textContent = staff.length;
+
+  renderTrendText('trendQ', qVal, baselines.q, 'vs last month');
+  renderTrendText('trendV', vVal, baselines.v, 'vs last month');
+  renderTrendText('trendL', lVal, baselines.l, 'vs last month');
+  renderTrendText('trendVel', velVal, baselines.vel, 'items / week');
+
+  renderQualitySignal();
+  renderTeamFeed();
+  renderStudentImpact();
+}
+
+function renderQualitySignal() {
+  const trend = reworkTrend;
+  const rateEl = document.getElementById('reworkRate');
+  const deltaEl = document.getElementById('reworkDelta');
+  const statusEl = document.getElementById('qualityStatus');
+  const sparkEl = document.getElementById('reworkSpark');
+
+  if (!trend || !trend.length) return;
+
+  const currentRate = trend[trend.length - 1];
+  const prevRate = trend[trend.length - 2] || 0;
+  const diff = currentRate - prevRate;
+
+  if (rateEl) rateEl.textContent = currentRate.toFixed(1) + '%';
+  
+  if (deltaEl) {
+    if (diff < 0) {
+      deltaEl.textContent = '▼ ' + Math.abs(diff).toFixed(1);
+      deltaEl.className = 'delta';
+      deltaEl.style.color = 'var(--green)';
+    } else if (diff > 0) {
+      deltaEl.textContent = '▲ ' + diff.toFixed(1);
+      deltaEl.className = 'delta';
+      deltaEl.style.color = 'var(--red)';
+    } else {
+      deltaEl.textContent = 'steady';
+      deltaEl.className = 'delta';
+      deltaEl.style.color = 'var(--ink-faint)';
+    }
+  }
+
+  if (statusEl) {
+    if (currentRate > 12) {
+      statusEl.textContent = 'warning';
+      statusEl.className = 'tag warn';
+    } else {
+      statusEl.textContent = 'stable';
+      statusEl.className = 'tag ok';
+    }
+  }
+
+  if (sparkEl) {
+    const W = 300, H = 70;
+    const maxVal = Math.max(12, ...trend);
+    const X = i => i * (W / (trend.length - 1));
+    const Y = v => H - 10 - (v / maxVal) * (H - 20);
+
+    let pointsStr = '';
+    trend.forEach((v, i) => {
+      pointsStr += `${X(i)},${Y(v)} `;
+    });
+
+    let fillStr = pointsStr + ` ${W},${H} 0,${H}`;
+
+    sparkEl.innerHTML = `
+      <polyline fill="none" stroke="var(--green)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" points="${pointsStr}"/>
+      <polyline fill="var(--green-soft)" stroke="none" opacity=".5" points="${fillStr}"/>
+    `;
+  }
+}
+
+function renderTeamFeed() {
+  const wrap = document.getElementById('teamFeedWrap');
+  if (!wrap) return;
+  if (!teamFeed || !teamFeed.length) {
+    wrap.innerHTML = '<div class="empty">No recent activity. Feed is empty.</div>';
+    return;
+  }
+  wrap.innerHTML = teamFeed.map(item => `
+    <div class="feed-item">
+      <span class="bubble">${item.bubble}</span>
+      <div>
+        <div class="ft">${item.text}</div>
+        <div class="fwhen">${item.when}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderStudentImpact() {
+  const elFirst = document.getElementById('impactFirstTry');
+  const elDelta = document.getElementById('impactDelta');
+  const elReached = document.getElementById('impactReached');
+
+  if (elFirst) elFirst.textContent = (studentImpact.firstTry || 0) + '%';
+  if (elDelta) elDelta.textContent = (studentImpact.delta >= 0 ? '+' : '') + (studentImpact.delta || 0) + '%';
+  if (elReached) elReached.textContent = (studentImpact.reached || 0).toLocaleString();
+}
+
+function renderGrowthCard() {
+  const xp = currentXP;
+  let currentLevelName = 'Contributor';
+  let nextLevelName = 'Senior';
+  let currentLevelNum = 1;
+  let nextThreshold = lvlS;
+  let prevThreshold = lvlC;
+
+  if (xp >= lvlL) {
+    currentLevelName = 'Lead Contributor';
+    nextLevelName = 'Expert';
+    currentLevelNum = 3;
+    nextThreshold = lvlL * 2;
+    prevThreshold = lvlL;
+  } else if (xp >= lvlS) {
+    currentLevelName = 'Senior';
+    nextLevelName = 'Lead Contributor';
+    currentLevelNum = 2;
+    nextThreshold = lvlL;
+    prevThreshold = lvlS;
+  }
+
+  const range = nextThreshold - prevThreshold;
+  const progressInRange = xp - prevThreshold;
+  const pct = Math.min(100, Math.max(0, (progressInRange / Math.max(1, range)) * 100));
+
+  const elLevelTitle = document.getElementById('growthLevelTitle');
+  const elLevelPath = document.getElementById('growthLevelPath');
+  const elXpText = document.getElementById('growthXpText');
+  const elXpBar = document.getElementById('xpbar');
+  const elSkillsBlock = document.getElementById('growthSkillsBlock');
+
+  if (elLevelTitle) {
+    elLevelTitle.textContent = `Level ${currentLevelNum} of 3 · ${xp > 0 ? 'keep building' : 'start your journey'}`;
+  }
+
+  if (elLevelPath) {
+    elLevelPath.innerHTML = `<span class="now">● ${currentLevelName}</span><span>→ ${nextLevelName}</span>`;
+  }
+
+  if (elXpBar) {
+    elXpBar.style.width = pct + '%';
+  }
+
+  if (elXpText) {
+    const remaining = Math.max(0, nextThreshold - xp);
+    elXpText.innerHTML = `<b>${xp.toLocaleString()} / ${nextThreshold.toLocaleString()} XP</b> — ${remaining.toLocaleString()} to reach ${nextLevelName}`;
+  }
+
+  if (elSkillsBlock) {
+    if (xp > 0) {
+      elSkillsBlock.innerHTML = `Skills sharpening: <b style="color:var(--ink)">Question design</b>, <b style="color:var(--ink)">Concept clarity</b>. Reviewers rated your last work <b style="color:var(--green)">high quality</b>.`;
+    } else {
+      elSkillsBlock.innerHTML = `Skills sharpening: <b style="color:var(--ink-soft)">Log completed tasks</b> to sharpen your concept clarity and question design.`;
+    }
+  }
+}
+
+function drawAnalytics(){
+  const maxVal = Math.max(1, outputMix.q, outputMix.v, outputMix.l, outputMix.r);
+  const mixWrap = document.getElementById('outputMixWrap');
+  if (mixWrap) {
+    mixWrap.innerHTML = `
+      <div class="mixrow"><span class="ml">Questions</span><div class="mbar"><div style="width:${outputMix.q ? Math.max(8, (outputMix.q / maxVal) * 100) : 0}%; background:linear-gradient(90deg,var(--primary),var(--primary-deep))"></div></div><span class="mv num">${(outputMix.q || 0).toLocaleString()}</span></div>
+      <div class="mixrow"><span class="ml">Videos</span><div class="mbar"><div style="width:${outputMix.v ? Math.max(8, (outputMix.v / maxVal) * 100) : 0}%; background:var(--amber)"></div></div><span class="mv num">${(outputMix.v || 0).toLocaleString()}</span></div>
+      <div class="mixrow"><span class="ml">Lessons</span><div class="mbar"><div style="width:${outputMix.l ? Math.max(8, (outputMix.l / maxVal) * 100) : 0}%; background:var(--green)"></div></div><span class="mv num">${(outputMix.l || 0).toLocaleString()}</span></div>
+      <div class="mixrow"><span class="ml">Reviews</span><div class="mbar"><div style="width:${outputMix.r ? Math.max(8, (outputMix.r / maxVal) * 100) : 0}%; background:#7aa6a4"></div></div><span class="mv num">${(outputMix.r || 0).toLocaleString()}</span></div>
+    `;
+  }
+
+  const wk = weeklyTrend;
+  const W=560,H=210,pad=24;
+  const max = Math.max(10, ...wk) * 1.1;
+  const X=i=>pad+i*((W-pad*2)/Math.max(1, wk.length-1)),Y=v=>H-pad-(v/max)*(H-pad*2);
+  let line='',area=`M${X(0)},${H-pad} `;
+  wk.forEach((v,i)=>{line+=(i?'L':'M')+X(i)+','+Y(v)+' ';area+=`L${X(i)},${Y(v)} `;});
+  area+=`L${X(wk.length-1)},${H-pad} Z`;
+  
+  const gridVals = [0, Math.round(max * 0.25), Math.round(max * 0.5), Math.round(max * 0.75), Math.round(max)];
+  let grid='';
+  gridVals.forEach(g=>{
+    grid+=`<line x1="${pad}" y1="${Y(g)}" x2="${W-pad}" y2="${Y(g)}" stroke="var(--line)" stroke-width="1"/><text class="chart-axis" x="2" y="${Y(g)+3}">${g}</text>`;
+  });
+  
+  let dots=wk.map((v,i)=>`<circle cx="${X(i)}" cy="${Y(v)}" r="3.5" fill="var(--primary)"/>`).join('');
+  let labs=wk.map((v,i)=>`<text class="chart-axis" x="${X(i)}" y="${H-6}" text-anchor="middle">W${i+1}</text>`).join('');
+  document.getElementById('trend').innerHTML=`${grid}<path d="${area}" fill="var(--primary-soft)" opacity=".55"/><path d="${line}" fill="none" stroke="var(--primary)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>${dots}${labs}`;
+  
+  const sorted=[...staff].sort((a,b)=>b.month-a.month);
+  const cmax=Math.max(1, ...sorted.map(s=>s.month));
+  const bw=64,gap=(560-sorted.length*bw)/(sorted.length+1);
+  document.getElementById('contrib').innerHTML=sorted.map((s,i)=>{
+    const h=s.month > 0 ? (s.month/cmax)*100 : 0,x=gap+i*(bw+gap),y=120-h;
+    return `<rect class="contrib-bar" x="${x}" y="${y}" width="${bw}" height="${h}" rx="7" fill="var(--primary)" opacity="${1-i*.13}"></rect><text class="chart-axis" x="${x+bw/2}" y="138" text-anchor="middle">${s.in}</text><text class="chart-axis" x="${x+bw/2}" y="${y-5}" text-anchor="middle" style="fill:var(--ink-soft);font-weight:700">${s.month}</text>`;
+  }).join('');
+}
+['anSeg','repSeg','staffSeg'].forEach(id=>{const seg=document.getElementById(id);if(seg)seg.querySelectorAll('button').forEach(b=>b.onclick=()=>{seg.querySelectorAll('button').forEach(x=>x.classList.remove('on'));b.classList.add('on');if(id==='anSeg')drawAnalytics();});});
+
+/* ===== PDF GENERATION (native print → Save as PDF, no external libs) ===== */
+function getDynamicReports() {
+  const qVal = outputMix.q || 0;
+  const vVal = outputMix.v || 0;
+  const lVal = outputMix.l || 0;
+  const rVal = outputMix.r || 0;
+  const velVal = activeVelocity || 0;
+
+  return {
+    Daily: {
+      period: 'today',
+      q: [Math.round(qVal / 22).toLocaleString(), qVal ? '▲ vs yesterday' : 'steady'],
+      v: [Math.round(vVal / 22).toLocaleString(), 'steady'],
+      l: [Math.round(lVal / 22).toLocaleString(), 'steady'],
+      vel: [Math.round(velVal / 5).toLocaleString() + ' pts', 'logged today'],
+      rework: '5.1% — stable',
+      conf: `${Math.round(qVal / 22).toLocaleString()} confirmed today`,
+      scale: 1/22
+    },
+    Weekly: {
+      period: 'this week',
+      q: [Math.round(qVal / 4.3).toLocaleString(), qVal ? '▲ 9% vs last week' : 'steady'],
+      v: [Math.round(vVal / 4.3).toLocaleString(), vVal ? '▲ 6%' : 'steady'],
+      l: [Math.round(lVal / 4.3).toLocaleString(), lVal ? '▲ 12%' : 'steady'],
+      vel: [velVal.toLocaleString() + '/wk', 'items this week'],
+      rework: '6.0% — stable',
+      conf: `${Math.round(qVal / 4.3).toLocaleString()} confirmed this week`,
+      scale: 1/4.3
+    },
+    Monthly: {
+      period: 'this month',
+      q: [qVal.toLocaleString(), qVal ? '▲ 12% vs last month' : 'steady'],
+      v: [vVal.toLocaleString(), vVal ? '▲ 8%' : 'steady'],
+      l: [lVal.toLocaleString(), lVal ? '▼ 3%' : 'steady'],
+      vel: [velVal.toLocaleString() + '/wk', 'avg this month'],
+      rework: '6.2% — stable',
+      conf: `${qVal.toLocaleString()} confirmed this month`,
+      scale: 1
+    },
+    Yearly: {
+      period: 'this year',
+      q: [Math.round(qVal * 11).toLocaleString(), qVal ? '▲ 31% YoY' : 'steady'],
+      v: [Math.round(vVal * 11).toLocaleString(), vVal ? '▲ 24% YoY' : 'steady'],
+      l: [Math.round(lVal * 11).toLocaleString(), lVal ? '▲ 18% YoY' : 'steady'],
+      vel: [Math.round(velVal * 0.92).toLocaleString() + '/wk', 'avg this year'],
+      rework: '7.4% — within range',
+      conf: `${Math.round(qVal * 11).toLocaleString()} confirmed this year`,
+      scale: 11
+    }
+  };
+}
+
+function selRange(kind){
+  if(kind==='staff'){const b=document.querySelector('#staffSeg .on');return b?b.textContent.trim():'Daily';}
+  if(kind==='range'){const b=document.querySelector('#repSeg .on');return b?b.dataset.r:'Daily';}
+  return 'Monthly';
+}
+function genPDF(kind){
+  const range=selRange(kind);
+  const REPORTS = getDynamicReports();
+  const D=REPORTS[range]||REPORTS.Monthly;
+  const who=(currentUser&&currentUser.role==='staff'?currentUser.name:'Anjana R');
+  const titleMap={staff:who+' — '+range+' Production Report',ops:'Content Operations Report — '+range,
+    full:'Full Operations & Configuration Report — '+range,range:range+' Production Report'};
+  const title=titleMap[kind]||'Production Report';
+  const stat=(n,v,d)=>`<div class="rstat"><div class="rsn">${n}</div><div class="rsv">${v}</div><div class="rsd">${d}</div></div>`;
+  const kv=(k,v)=>`<tr><td class="rk">${k}</td><td class="rv">${v}</td></tr>`;
+  const srows=[...staff].sort((a,b)=>b.month-a.month)
+    .map(s=>`<tr><td>${s.n}</td><td class="rmut">${s.role}</td><td class="rnum">${Math.round(s.month*D.scale).toLocaleString()} pts</td></tr>`).join('');
+  
+  let forecastDateStr = '';
+  if (outputMix.q >= SYLLABUS_GOAL) {
+    forecastDateStr = 'Completed';
+  } else if (activeVelocity <= 0) {
+    forecastDateStr = 'Never (no velocity)';
+  } else {
+    const baseDate = new Date(2026, 5, 8);
+    const remaining = Math.max(0, SYLLABUS_GOAL - outputMix.q);
+    const weeksNeeded = remaining / activeVelocity;
+    const daysNeeded = Math.ceil(weeksNeeded * 7);
+    const targetDate = new Date(baseDate);
+    targetDate.setDate(baseDate.getDate() + daysNeeded);
+
+    const options = { day: 'numeric', month: 'long', year: 'numeric' };
+    forecastDateStr = '~' + targetDate.toLocaleDateString('en-GB', options) + ' — on track';
+  }
+
+  const reportHTML = `
+    <div class="report-doc">
+      <div class="rhead">
+        <div><div class="rbrand">Tella Learning</div><div class="rtitle">${title}</div></div>
+        <div class="rgen">Generated<br><b>${new Date().toLocaleString('en-GB')}</b></div>
+      </div>
+      <h3 class="rh">Production summary · ${D.period}</h3>
+      <div class="rgrid">
+        ${stat('Questions',D.q[0],D.q[1])}
+        ${stat('Videos',D.v[0],D.v[1])}
+        ${stat('Lessons',D.l[0],D.l[1])}
+        ${stat('Velocity',D.vel[0],D.vel[1])}
+      </div>
+      <h3 class="rh">Quality &amp; forecast</h3>
+      <table class="rtable">
+        ${kv('Team rework / rejection rate',D.rework+' (early-warning at 12%)')}
+        ${kv('Syllabus completion forecast', forecastDateStr)}
+        ${kv(`Confirmed toward ${SYLLABUS_GOAL.toLocaleString()}-question syllabus`, D.conf)}
+      </table>
+      <h3 class="rh">Configured targets &amp; levels</h3>
+      <table class="rtable">
+        ${kv('Daily point target',TARGET+' pts')}
+        ${kv('Difficulty multipliers','Easy ×'+tiers.Easy.toFixed(1)+' · Medium ×'+tiers.Medium.toFixed(1)+' · Hard ×'+tiers.Hard.toFixed(1))}
+        ${kv('Lead Contributor threshold',leadXP.toLocaleString()+' XP')}
+        ${kv('Active task types',taskConfig.length+' configured')}
+      </table>
+      <h3 class="rh">Staff contribution — ${D.period}</h3>
+      <table class="rtable rstaff"><thead><tr><th>Person</th><th>Role</th><th class="rnum">Points</th></tr></thead><tbody>${srows}</tbody></table>
+      <div class="rfoot">Tella Learning · verified, quality-gated production. Points are provisional until a reviewer confirms them. Attendance is tracked separately for payroll and excluded from the performance score.</div>
+    </div>`;
+
+  // Populate print area for local window (fallback)
+  document.getElementById('printArea').innerHTML = reportHTML;
+  document.title = 'Tella — ' + title;
+
+  // Try opening in a new tab first to bypass iframe sandbox restrictions
+  let printWindow = null;
+  try {
+    printWindow = window.open('', '_blank');
+  } catch (e) {
+    console.warn('window.open blocked:', e);
+  }
+
+  if (printWindow) {
+    const styleContent = document.querySelector('style').innerHTML;
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <title>Tella — ${title}</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Hanken+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+        <style>${styleContent}</style>
+      </head>
+      <body>
+        <div id="printArea" style="display: block !important;">
+          ${reportHTML}
+        </div>
+        <script>
+          window.onload = function() {
+            setTimeout(() => {
+              window.print();
+              window.close();
+            }, 350);
+          };
+        <\/script>
+      </body>
+      </html>
+    `);
+    printWindow.document.close();
+    // Reset main document title
+    setTimeout(() => {
+      document.title = 'Tella Learning — Production & Growth';
+    }, 1000);
+  } else {
+    // Fallback: print inside current window
+    toast('Opening ' + range + ' report — choose "Save as PDF"');
+    setTimeout(() => {
+      window.print();
+      document.title = 'Tella Learning — Production & Growth';
+    }, 250);
+  }
+}
+
+
+/* ===== confetti ===== */
+const cv=document.getElementById('confetti'),cx=cv.getContext('2d');let parts=[];
+function size(){cv.width=innerWidth;cv.height=innerHeight;}size();addEventListener('resize',size);
+function burst(){toast('🎉 Daily target reached — nice work, Anjana!');const cols=['#0c6e6b','#1f9d57','#e08a00','#2fb9b4','#3fc279'];for(let i=0;i<140;i++)parts.push({x:innerWidth/2,y:innerHeight*0.35,vx:(Math.random()-.5)*14,vy:Math.random()*-15-4,r:Math.random()*7+3,c:cols[i%cols.length],rot:Math.random()*6,vr:(Math.random()-.5)*.4,life:1});if(parts.length<=140)anim();}
+function anim(){cx.clearRect(0,0,cv.width,cv.height);parts.forEach(p=>{p.vy+=.45;p.x+=p.vx;p.y+=p.vy;p.rot+=p.vr;p.life-=.009;cx.save();cx.translate(p.x,p.y);cx.rotate(p.rot);cx.globalAlpha=Math.max(p.life,0);cx.fillStyle=p.c;cx.fillRect(-p.r/2,-p.r/2,p.r,p.r*1.5);cx.restore();});parts=parts.filter(p=>p.life>0&&p.y<cv.height+40);if(parts.length)requestAnimationFrame(anim);else cx.clearRect(0,0,cv.width,cv.height);}
+
+/* ===== AUTH (prototype, client-side only) ===== */
+let users=[
+  {name:'Super Admin',username:'super',role:'super',password:'Super@2026',in:'SA'},
+  {name:'Tella Admin',username:'admin',role:'admin',password:'Admin@2026',in:'TA'}
+].concat(staff.map(s=>({name:s.n,username:s.n.split(' ')[0].toLowerCase(),role:'staff',password:'Staff@2026',in:s.in})));
+let currentUser=null, bannerName='Anjana R';
+const roleLabel={super:'Super Admin',admin:'Admin',staff:'Staff'};
+
+/* ===== SUPABASE CLOUD SYNC LAYER ===== */
+async function testSupabaseConnection() {
+  if (!sbClient) return false;
+  try {
+    const { data, error } = await sbClient.from('app_config').select('key').limit(1);
+    if (error) throw error;
+    return true;
+  } catch (e) {
+    console.warn('Supabase connectivity check failed:', e);
+    return false;
+  }
+}
+
+function updateDBStatus(connected, url = '', key = '') {
+  const pill1 = document.getElementById('dbStatusPill');
+  const pill2 = document.getElementById('topbarStatusPill');
+  const connBtn = document.getElementById('connectDbBtn');
+  const discBtn = document.getElementById('disconnectDbBtn');
+  
+  if (connected) {
+    if (pill1) {
+      pill1.textContent = '● Connected';
+      pill1.style.background = 'var(--green-soft)';
+      pill1.style.color = 'var(--green)';
+    }
+    if (pill2) {
+      pill2.innerHTML = '<span style="width: 6px; height: 6px; border-radius: 50%; background: var(--green); display: inline-block;"></span>Cloud Connected';
+      pill2.style.background = 'var(--green-soft)';
+      pill2.style.color = 'var(--green)';
+    }
+    if (connBtn) connBtn.style.display = 'none';
+    if (discBtn) discBtn.style.display = 'inline-block';
+    if (document.getElementById('sbUrl')) document.getElementById('sbUrl').value = url;
+    if (document.getElementById('sbKey')) document.getElementById('sbKey').value = key;
+  } else {
+    if (pill1) {
+      pill1.textContent = '● Cloud unreachable';
+      pill1.style.background = 'var(--red-soft)';
+      pill1.style.color = 'var(--red)';
+    }
+    if (pill2) {
+      pill2.innerHTML = '<span style="width: 6px; height: 6px; border-radius: 50%; background: var(--red); display: inline-block;"></span>Cloud unreachable';
+      pill2.style.background = 'var(--red-soft)';
+      pill2.style.color = 'var(--red)';
+    }
+    if (connBtn) connBtn.style.display = 'inline-block';
+    if (discBtn) discBtn.style.display = 'none';
+    if (document.getElementById('sbUrl')) document.getElementById('sbUrl').value = SUPABASE_URL;
+    if (document.getElementById('sbKey')) document.getElementById('sbKey').value = SUPABASE_KEY;
+  }
+}
+
+function fallbackToLocalMode(reason) {
+  sbClient = null;
+  updateDBStatus(false);
+  console.warn('Cloud connection unavailable. Reason:', reason);
+  if (typeof toast === 'function') toast('⚠️ Cloud unreachable: ' + reason);
+}
+
+async function initSupabaseClient() {
+  try {
+    if (!window.supabase) {
+      fallbackToLocalMode('Supabase library not loaded (check internet)');
+      return false;
+    }
+    sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const isWorking = await testSupabaseConnection();
+    if (isWorking) {
+      updateDBStatus(true, SUPABASE_URL, SUPABASE_KEY);
+      return true;
+    } else {
+      fallbackToLocalMode('Cannot reach database — verify the SQL script has been run and the project is online');
+      return false;
+    }
+  } catch (e) {
+    fallbackToLocalMode('Init error: ' + e.message);
+    return false;
+  }
+}
+
+// Connect / Reconnect — re-establishes the cloud client and reloads live data.
+document.getElementById('connectDbBtn').onclick = async () => {
+  if (!window.supabase) {
+    toast('❌ Supabase library not loaded. Check internet connection.');
+    return;
+  }
+  toast('Connecting to cloud database...');
+  try {
+    const tempSupabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const { error } = await tempSupabase.from('app_config').select('key').limit(1);
+    if (error) throw error;
+    sbClient = tempSupabase;
+    updateDBStatus(true, SUPABASE_URL, SUPABASE_KEY);
+    toast('🚀 Connected. Loading live database state...');
+    await fetchStateFromSupabase();
+  } catch (e) {
+    console.error('Connection failed:', e);
+    toast('❌ Connection failed: ' + e.message + '. Make sure the SQL script has been run.');
+  }
+};
+
+// Reload — pull a fresh copy of everything from the cloud.
+document.getElementById('disconnectDbBtn').onclick = () => {
+  toast('🔄 Reloading from cloud...');
+  window.location.reload();
+};
+
+async function fetchStateFromSupabase() {
+  if (!sbClient) return;
+  try {
+    // 1. Fetch app configuration
+    const { data: configData, error: configErr } = await sbClient.from('app_config').select('*');
+    if (configErr) throw configErr;
+    
+    // Parse global config settings
+    const settingsItem = configData.find(c => c.key === 'settings');
+    if (settingsItem && settingsItem.value) {
+      const v = settingsItem.value;
+      if (v.TARGET !== undefined) TARGET = v.TARGET;
+      if (v.SYLLABUS_GOAL !== undefined) SYLLABUS_GOAL = v.SYLLABUS_GOAL;
+      if (v.lvlC !== undefined) lvlC = v.lvlC;
+      if (v.lvlS !== undefined) lvlS = v.lvlS;
+      if (v.lvlL !== undefined) lvlL = v.lvlL;
+      if (v.leadXP !== undefined) leadXP = v.leadXP;
+      if (v.tiers) tiers = v.tiers;
+      if (v.taskConfig) taskConfig = v.taskConfig;
+      if (v.weeklyTrend) weeklyTrend = v.weeklyTrend;
+      if (v.outputMix) outputMix = v.outputMix;
+      if (v.activeVelocity !== undefined) activeVelocity = v.activeVelocity;
+      if (v.baselines) baselines = v.baselines;
+      if (v.reworkTrend) reworkTrend = v.reworkTrend;
+      if (v.teamFeed) teamFeed = v.teamFeed;
+      if (v.studentImpact) studentImpact = v.studentImpact;
+    }
+
+    // 2. Fetch users
+    const { data: usersData, error: usersErr } = await sbClient.from('users').select('*');
+    if (usersErr) throw usersErr;
+    if (usersData && usersData.length) {
+      // DB stores the avatar text in the `initials` column, but the app uses `.in` everywhere.
+      // Map it back so cloud-loaded users keep their avatars and chip text.
+      users = usersData.map(u => ({
+        name: u.name,
+        username: u.username,
+        role: u.role,
+        password: u.password,
+        in: u.in || u.initials || (u.name ? u.name.trim().split(/\s+/).map(w=>w[0]).join('').slice(0,2).toUpperCase() : '')
+      }));
+      // Guarantee default admin fallback accounts exist to prevent lockouts
+      if (!users.some(u => u.username === 'super')) {
+        users.push({name:'Super Admin',username:'super',role:'super',password:'Super@2026',in:'SA'});
+      }
+      if (!users.some(u => u.username === 'admin')) {
+        users.push({name:'Tella Admin',username:'admin',role:'admin',password:'Admin@2026',in:'TA'});
+      }
+    }
+
+    // 3. Fetch staff scores
+    const { data: staffData, error: staffErr } = await sbClient.from('staff_scores').select('*');
+    if (staffErr) throw staffErr;
+    if (staffData && staffData.length) {
+      staff = staffData.map(s => ({
+        n: s.n,
+        in: s.in,
+        role: s.role,
+        today: s.today,
+        month: s.month,
+        provisional: s.provisional,
+        rew: s.rew,
+        att: s.att,
+        streak: s.streak
+      }));
+    }
+
+    // 4. Fetch ship logs
+    const { data: shipData, error: shipErr } = await sbClient.from('ship_logs').select('*').order('date', { ascending: false });
+    if (shipErr) throw shipErr;
+    if (shipData) {
+      // DB stores user_name / task_id, but the whole UI reads .user / .taskId.
+      // Map them back so cloud-loaded logs render correctly everywhere.
+      ship = shipData.map(s => ({
+        id: s.id,
+        ico: s.ico,
+        t: s.t,
+        s: s.s,
+        pts: s.pts,
+        st: s.st,
+        user: s.user_name,
+        date: s.date,
+        taskId: s.task_id,
+        qty: s.qty
+      }));
+    }
+
+    // 5. Fetch review queue
+    const { data: queueData, error: queueErr } = await sbClient.from('review_queue').select('*');
+    if (queueErr) throw queueErr;
+    if (queueData) {
+      queue = queueData;
+    }
+
+    // 6. Fetch assignments
+    const { data: asgData, error: asgErr } = await sbClient.from('assignments').select('*');
+    if (asgErr) throw asgErr;
+    if (asgData) {
+      assignments = asgData.map(a => ({
+        staff: a.staff_name,
+        in: a.in,
+        taskLabel: a.task_label,
+        qty: a.qty,
+        diff: a.difficulty
+      }));
+    }
+
+    // Synchronize current local configurations and render all views
+    syncConfigInputs();
+    renderTaskDropdown();
+    renderTiers();
+    renderShip();
+    renderQueue();
+    renderStaffTable();
+    renderTaskTable();
+    fillStaffSelect();
+    renderAsgTask();
+    renderAssignList();
+    renderAssignBanner();
+    renderUsers();
+
+    if (currentUser) {
+      if (currentUser.role === 'staff') {
+        const rec = staff.find(s => s.n === currentUser.name);
+        if (rec) {
+          syncStaffView(currentUser.name);
+        }
+      }
+    } else {
+      syncStaffView('Anjana R');
+    }
+    
+    renderAdminDashboard();
+    drawAnalytics();
+  } catch (e) {
+    console.error('Error fetching Supabase state:', e);
+    toast('❌ Error syncing with database: ' + e.message);
+  }
+}
+
+function syncConfigInputs() {
+  if (document.getElementById('syllabusGoal')) document.getElementById('syllabusGoal').value = SYLLABUS_GOAL;
+  if (document.getElementById('dailyTgt')) document.getElementById('dailyTgt').value = TARGET;
+  if (document.getElementById('tgtRing')) document.getElementById('tgtRing').textContent = TARGET;
+  if (document.getElementById('tgtV')) document.getElementById('tgtV').textContent = TARGET;
+  if (document.getElementById('tgt')) document.getElementById('tgt').value = Math.min(80, Math.max(30, TARGET));
+  if (document.getElementById('lvlC')) document.getElementById('lvlC').value = lvlC;
+  if (document.getElementById('lvlS')) document.getElementById('lvlS').value = lvlS;
+  if (document.getElementById('lvlL')) document.getElementById('lvlL').value = lvlL;
+  setRing();
+}
+
+async function pushSettingsToSupabase() {
+  if (!sbClient) return;
+  try {
+    const settings = {
+      TARGET,
+      SYLLABUS_GOAL,
+      lvlC,
+      lvlS,
+      lvlL,
+      leadXP,
+      tiers,
+      taskConfig,
+      weeklyTrend,
+      outputMix,
+      activeVelocity,
+      baselines,
+      reworkTrend,
+      teamFeed,
+      studentImpact
+    };
+    const { error } = await sbClient.from('app_config').upsert({ key: 'settings', value: settings }, { onConflict: 'key' });
+    if (error) throw error;
+  } catch (e) {
+    console.error('Error pushing config to Supabase:', e);
+  }
+}
+
+async function pushStaffScoreToSupabase(rec) {
+  if (!sbClient) return;
+  try {
+    const { error } = await sbClient.from('staff_scores').upsert({
+      n: rec.n,
+      in: rec.in,
+      role: rec.role,
+      today: rec.today || 0,
+      month: rec.month || 0,
+      provisional: rec.provisional || 0,
+      rew: rec.rew || '0%',
+      att: rec.att || 'out',
+      streak: rec.streak || 0
+    }, { onConflict: 'n' });
+    if (error) throw error;
+  } catch (e) {
+    console.error('Error pushing staff score:', e);
+  }
+}
+
+async function pushUserToSupabase(user) {
+  if (!sbClient) return;
+  try {
+    const { error } = await sbClient.from('users').upsert({
+      name: user.name,
+      username: user.username,
+      role: user.role,
+      password: user.password,
+      initials: user.in
+    }, { onConflict: 'username' });
+    if (error) throw error;
+  } catch (e) {
+    console.error('Error pushing user:', e);
+    throw e;
+  }
+}
+
+async function deleteUserFromSupabase(username) {
+  if (!sbClient) return;
+  try {
+    const { error } = await sbClient.from('users').delete().eq('username', username);
+    if (error) throw error;
+  } catch (e) {
+    console.error('Error deleting user:', e);
+  }
+}
+
+async function pushDemoStateToSupabase(demoState) {
+  if (!sbClient) return;
+  try {
+    toast('Syncing default configurations to cloud database...');
+    const settings = {
+      TARGET: demoState.TARGET,
+      SYLLABUS_GOAL: demoState.SYLLABUS_GOAL,
+      lvlC: demoState.lvlC || 0,
+      lvlS: demoState.lvlS || 500,
+      lvlL: demoState.lvlL || 1000,
+      leadXP: demoState.leadXP,
+      tiers: demoState.tiers,
+      taskConfig: demoState.taskConfig,
+      weeklyTrend: demoState.weeklyTrend,
+      outputMix: demoState.outputMix,
+      activeVelocity: demoState.activeVelocity,
+      baselines: demoState.baselines,
+      reworkTrend: demoState.reworkTrend,
+      teamFeed: demoState.teamFeed,
+      studentImpact: demoState.studentImpact
+    };
+    await sbClient.from('app_config').upsert({ key: 'settings', value: settings }, { onConflict: 'key' });
+
+    toast('Configuring cloud user credentials...');
+    await sbClient.from('users').delete().neq('username', 'placeholder');
+    const { error: userErr } = await sbClient.from('users').insert(demoState.users.map(u => ({
+      name: u.name,
+      username: u.username,
+      role: u.role,
+      password: u.password,
+      initials: u.in
+    })));
+    if (userErr) throw userErr;
+
+    toast('Syncing team performance profiles...');
+    await sbClient.from('staff_scores').delete().neq('n', 'placeholder');
+    const { error: staffErr } = await sbClient.from('staff_scores').insert(demoState.staff.map(s => ({
+      n: s.n,
+      in: s.in,
+      role: s.role,
+      today: s.today,
+      month: s.month,
+      provisional: s.provisional || 0,
+      rew: s.rew,
+      att: s.att,
+      streak: s.streak
+    })));
+    if (staffErr) throw staffErr;
+
+    toast('Pushing production ship logs...');
+    await sbClient.from('ship_logs').delete().neq('id', 'placeholder');
+    const { error: shipErr } = await sbClient.from('ship_logs').insert(demoState.ship.map(s => ({
+      id: s.id || ('log_' + Math.random().toString(36).substr(2, 9)),
+      ico: s.ico,
+      t: s.t,
+      s: s.s,
+      pts: s.pts,
+      st: s.st,
+      user_name: s.user,
+      date: s.date,
+      task_id: s.taskId || 'q',
+      qty: s.qty || 1
+    })));
+    if (shipErr) throw shipErr;
+
+    toast('Clearing queue and setting up assignments...');
+    await sbClient.from('review_queue').delete().neq('id', 'placeholder');
+    if (demoState.queue && demoState.queue.length) {
+      const { error: qErr } = await sbClient.from('review_queue').insert(demoState.queue.map((q, idx) => ({
+        id: 'q_' + idx + '_' + Date.now(),
+        n: q.n,
+        in: q.in,
+        d: q.d,
+        p: q.p,
+        log_id: null
+      })));
+      if (qErr) throw qErr;
+    }
+
+    await sbClient.from('assignments').delete().gt('id', 0);
+    toast('✅ Database reset completed successfully!');
+  } catch (e) {
+    console.error('Error pushing demo state to Supabase:', e);
+    toast('⚠️ Database reset failed: ' + e.message);
+  }
+}
+
+/* ===== PERSISTENCE LAYER (cloud-only — nothing is ever stored locally) ===== */
+function saveState() {
+  // The cloud is the single source of truth. saveState() flushes the
+  // settings/analytics blob; row-level data (logs, queue, staff, users,
+  // assignments) is written directly to its table at each action site.
+  if (sbClient) {
+    pushSettingsToSupabase();
+  }
+}
+
+function loadState() {
+  // No-op. All state is loaded from Supabase via fetchStateFromSupabase().
+  // Kept as a function so existing call sites stay valid.
+}
+function initials(n){return n.trim().split(/\s+/).map(w=>w[0]).join('').slice(0,2).toUpperCase();}
+function roleChip(r){return `<span class="rolechip ${r}">${roleLabel[r]}</span>`;}
+
+function doLogin(){
+  const u=(document.getElementById('liUser').value || '').trim().toLowerCase();
+  const p=document.getElementById('liPass').value || '';
+  const f=users.find(x=>x && x.username && x.username.toLowerCase()===u&&x.password===p);
+  if(!f){document.getElementById('liErr').textContent='Incorrect username or password';return;}
+  currentUser=f;document.getElementById('liErr').textContent='';document.getElementById('liPass').value='';
+  document.getElementById('login').classList.add('hidden');applyRole();updateChip();
+  toast('Signed in as '+f.name);
+}
+function updateChip(){
+  document.getElementById('userChip').style.display='flex';
+  document.getElementById('logout').style.display='grid';
+  document.getElementById('ucName').textContent=currentUser.name;
+  document.getElementById('ucRole').textContent=roleLabel[currentUser.role] || currentUser.role || 'Staff';
+  document.getElementById('ucAv').textContent=currentUser.in || '';
+}
+function renderStaffStatsCard(targetName) {
+  const rec = staff.find(s => s.n === targetName);
+  if (!rec) return;
+
+  const userLogs = ship.filter(s => s.user === targetName);
+  const confLogs = userLogs.filter(s => s.st === 'conf');
+
+  const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+  const oneMonthAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
+
+  let qWeek = 0, qMonth = 0, qTotal = 0;
+  let oWeek = 0, oMonth = 0, oTotal = 0;
+  let pWeek = 0, pMonth = 0, pTotal = 0;
+
+  function getLogTaskStats(log) {
+    if (log.taskId && log.qty !== undefined) {
+      return {
+        type: log.taskId === 'q' ? 'q' : 'other',
+        qty: log.qty
+      };
+    }
+    let qty = 0;
+    const numMatch = log.s ? log.s.match(/(\d+)/) : null;
+    if (numMatch) {
+      qty = parseInt(numMatch[1]);
+    } else {
+      qty = 1;
+    }
+    const labelLower = (log.t || '').toLowerCase();
+    const descLower = (log.s || '').toLowerCase();
+    let type = 'other';
+    if (labelLower.includes('question') || descLower.includes('question')) {
+      type = 'q';
+    }
+    return { type, qty };
+  }
+
+  confLogs.forEach(log => {
+    const logTime = log.date ? new Date(log.date).getTime() : Date.now();
+    const stats = getLogTaskStats(log);
+    const pts = log.pts || 0;
+
+    // Total
+    if (stats.type === 'q') {
+      qTotal += stats.qty;
+    } else {
+      oTotal += stats.qty;
+    }
+    pTotal += pts;
+
+    // Month
+    if (logTime >= oneMonthAgo) {
+      if (stats.type === 'q') {
+        qMonth += stats.qty;
+      } else {
+        oMonth += stats.qty;
+      }
+      pMonth += pts;
+    }
+
+    // Week
+    if (logTime >= oneWeekAgo) {
+      if (stats.type === 'q') {
+        qWeek += stats.qty;
+      } else {
+        oWeek += stats.qty;
+      }
+      pWeek += pts;
+    }
+  });
+
+  // Calculate team standing (rank)
+  const sortedStaff = [...staff].sort((a, b) => (b.month || 0) - (a.month || 0));
+  const rank = sortedStaff.findIndex(s => s.n === targetName) + 1;
+  const rankText = rank > 0 ? `#${rank} of ${staff.length}` : '#—';
+
+  // Calculate daily goal progress
+  const confirmedPts = rec.today || 0;
+  const goalPct = TARGET > 0 ? Math.round((confirmedPts / TARGET) * 100) : 0;
+  const goalText = `${goalPct}%`;
+
+  // Get growth level
+  const xp = rec.month || 0;
+  let levelName = 'Level 1';
+  if (xp >= lvlL) {
+    levelName = 'Level 3';
+  } else if (xp >= lvlS) {
+    levelName = 'Level 2';
+  }
+
+  // Update DOM
+  const elQWeek = document.getElementById('statsQWeek');
+  const elQMonth = document.getElementById('statsQMonth');
+  const elQLifetime = document.getElementById('statsQLifetime');
+
+  const elOWeek = document.getElementById('statsOWeek');
+  const elOMonth = document.getElementById('statsOMonth');
+  const elOLifetime = document.getElementById('statsOLifetime');
+
+  const elPWeek = document.getElementById('statsPWeek');
+  const elPMonth = document.getElementById('statsPMonth');
+  const elPLifetime = document.getElementById('statsPLifetime');
+
+  const elRank = document.getElementById('statsRank');
+  const elGoal = document.getElementById('statsGoalProgress');
+  const elLevel = document.getElementById('statsLevel');
+
+  if (elQLifetime) countUp(elQLifetime, qTotal, 800);
+  if (elOLifetime) countUp(elOLifetime, oTotal, 800);
+  if (elPLifetime) countUp(elPLifetime, pTotal, 800);
+
+  if (elQWeek) elQWeek.textContent = qWeek.toLocaleString();
+  if (elQMonth) elQMonth.textContent = qMonth.toLocaleString();
+
+  if (elOWeek) elOWeek.textContent = oWeek.toLocaleString();
+  if (elOMonth) elOMonth.textContent = oMonth.toLocaleString();
+
+  if (elPWeek) elPWeek.textContent = pWeek.toLocaleString() + ' pts';
+  if (elPMonth) elPMonth.textContent = pMonth.toLocaleString() + ' pts';
+
+  if (elRank) elRank.textContent = rankText;
+  if (elGoal) elGoal.textContent = goalText;
+  if (elLevel) elLevel.textContent = levelName;
+}
+
+function syncStaffView(targetName) {
+  const rec = staff.find(s => s.n === targetName);
+  if (!rec) return;
+  
+  // Greet details
+  const greetNameEl = document.getElementById('greetName');
+  if (greetNameEl) greetNameEl.textContent = 'Good morning, ' + targetName.split(' ')[0];
+  
+  const greetRoleEl = document.getElementById('greetRole');
+  if (greetRoleEl) {
+    const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+    const dateStr = new Date().toLocaleDateString('en-GB', options);
+    greetRoleEl.textContent = `${dateStr} · ${rec.role}`;
+  }
+  
+  // Streak
+  const streakEl = document.querySelector('.streak');
+  if (streakEl) {
+    const streakVal = rec.streak || 0;
+    if (streakVal > 0) {
+      streakEl.style.display = 'inline-flex';
+      streakEl.innerHTML = `<span class="flame">🔥</span> ${streakVal}-day streak`;
+    } else {
+      streakEl.style.display = 'inline-flex';
+      streakEl.innerHTML = `<span class="flame" style="filter:grayscale(1);opacity:0.4">🔥</span> 0-day streak`;
+    }
+  }
+  
+  // Points
+  confirmed = rec.today || 0;
+  provisional = rec.provisional || 0;
+  currentXP = rec.month || 0;
+  
+  const cptsEl = document.getElementById('cpts');
+  if (cptsEl) cptsEl.textContent = '0';
+  
+  const provNEl = document.getElementById('provN');
+  if (provNEl) provNEl.textContent = provisional.toLocaleString();
+  
+  setTimeout(() => {
+    if (document.getElementById('cpts')) {
+      countUp(document.getElementById('cpts'), confirmed, 800);
+    }
+    setRing();
+  }, 200);
+  
+  renderShip();
+  renderGrowthCard();
+  renderStaffStatsCard(targetName);
+}
+
+function applyRole(){
+  const perms={staff:['staff'],admin:['admin'],super:['staff','admin','super']};
+  const role = currentUser && currentUser.role ? currentUser.role : 'staff';
+  const allow=perms[role] || ['staff'];
+  document.querySelectorAll('.switch button').forEach(b=>b.style.display=allow.includes(b.dataset.view)?'block':'none');
+  const def=role==='super'?'super':role;
+  document.querySelectorAll('.switch button').forEach(x=>x.classList.toggle('active',x.dataset.view===def));
+  document.querySelectorAll('.view').forEach(v=>v.classList.toggle('active',v.id===def));
+  if(role==='staff'){
+    bannerName=currentUser.name;
+    syncStaffView(currentUser.name);
+  }else{bannerName='Anjana R';}
+  renderAssignBanner();
+  if(def==='super')drawAnalytics();
+  if(def==='admin')renderAdminDashboard();
+}
+function logout(){
+  currentUser=null;
+  document.getElementById('userChip').style.display='none';
+  document.getElementById('logout').style.display='none';
+  document.getElementById('login').classList.remove('hidden');
+  document.getElementById('liUser').value='';document.getElementById('liPass').value='';
+  document.getElementById('liUser').focus();
+}
+
+/* user management (super admin) */
+function renderUsers(){
+  document.getElementById('userCount').textContent=users.length+' accounts';
+  document.getElementById('userBody').innerHTML=users.map((u,i)=>`<tr>
+    <td><div class="who"><span class="av">${u.in}</span><div>${u.name}</div></div></td>
+    <td style="font-family:'Bricolage Grotesque';color:var(--ink-soft)">${u.username}</td>
+    <td>${roleChip(u.role)}</td>
+    <td class="pwcell" data-i="${i}">
+      <span style="letter-spacing:2px;color:var(--ink-faint)">••••••</span> 
+      <button class="del rst" data-i="${i}" style="width:auto;padding:6px 12px;font-size:12px;font-weight:600;color:var(--ink-soft);display:inline-block;vertical-align:middle">Reset</button>
+      <button class="del usr-del" data-i="${i}" style="width:auto;padding:6px 12px;font-size:12px;font-weight:600;color:var(--red);border-color:var(--red);background:var(--red-soft);margin-left:6px;display:inline-block;vertical-align:middle">Delete</button>
+    </td></tr>`).join('');
+  
+  document.querySelectorAll('#userBody .rst').forEach(b=>b.onclick=()=>{
+    const cell=b.closest('.pwcell');const i=+b.dataset.i;
+    cell.innerHTML=`<input class="pwedit" type="text" placeholder="new password"> <button class="qbtn app" style="width:32px;height:32px;display:inline-grid;vertical-align:middle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M5 13l4 4L19 7"/></svg></button>`;
+    const inp=cell.querySelector('.pwedit');inp.focus();
+    const save=async ()=>{
+      const v=inp.value.trim();
+      if(!v)return toast('Enter a password');
+      users[i].password=v;
+      renderUsers();
+      toast('Password updated for '+users[i].name);
+      saveState();
+      if (sbClient) {
+        try {
+          await pushUserToSupabase(users[i]);
+        } catch (e) {
+          console.error('Supabase password update failed:', e);
+          toast('⚠️ Cloud save failed: ' + e.message);
+        }
+      }
+    };
+    cell.querySelector('button').onclick=save;inp.onkeydown=e=>{if(e.key==='Enter')save();};
+  });
+
+  document.querySelectorAll('#userBody .usr-del').forEach(b=>{
+    b.onclick=async ()=>{
+      const i=+b.dataset.i;
+      const targetUser = users[i];
+      if (currentUser && targetUser.username === currentUser.username) {
+        return toast('Cannot delete your own active account!');
+      }
+      if (confirm(`Are you sure you want to delete account "${targetUser.name}"?`)) {
+        // Remove from staff list if staff
+        if (targetUser.role === 'staff') {
+          staff = staff.filter(s => s.n !== targetUser.name);
+          renderStaffTable();
+          fillStaffSelect();
+          drawAnalytics();
+        }
+        // Remove from users list
+        users.splice(i, 1);
+        renderUsers();
+        toast(`Deleted account "${targetUser.username}"`);
+        saveState();
+        if (sbClient) {
+          try {
+            await deleteUserFromSupabase(targetUser.username);
+            if (targetUser.role === 'staff') {
+              const { error } = await sbClient.from('staff_scores').delete().eq('n', targetUser.name);
+              if (error) throw error;
+            }
+          } catch (e) {
+            console.error('Supabase user deletion failed:', e);
+            toast('⚠️ Cloud deletion failed: ' + e.message);
+          }
+        }
+      }
+    };
+  });
+}
+document.getElementById('addUserBtn').onclick=async ()=>{
+  const name=document.getElementById('nuName').value.trim();
+  const un=document.getElementById('nuUser').value.trim().toLowerCase();
+  const role=document.getElementById('nuRole').value;
+  const pw=document.getElementById('nuPass').value.trim();
+  if(!name||!un||!pw)return toast('Fill name, username and password');
+  if(users.some(u=>u.username.toLowerCase()===un))return toast('That username already exists');
+  const init=initials(name);
+  const newUser = {name,username:un,role,password:pw,in:init};
+  users.push(newUser);
+  let newStaff = null;
+  if(role==='staff'){
+    newStaff = {n:name,in:init,role:'Content staff',today:0,rew:'0%',att:'out',month:0,streak:0};
+    staff.push(newStaff);
+    renderStaffTable();fillStaffSelect();drawAnalytics();
+  }
+  ['nuName','nuUser','nuPass'].forEach(id=>document.getElementById(id).value='');
+  renderUsers();toast('Created '+roleLabel[role]+' account "'+un+'"');
+  saveState();
+
+  if (sbClient) {
+    try {
+      await pushUserToSupabase(newUser);
+      if (newStaff) {
+        await pushStaffScoreToSupabase(newStaff);
+      }
+    } catch (e) {
+      console.error('Supabase user push failed:', e);
+      toast('⚠️ Cloud save failed — account NOT saved: ' + (e.message || e));
+    }
+  }
+};
+document.getElementById('liBtn').onclick=doLogin;
+document.getElementById('liPass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+document.getElementById('liUser').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('liPass').focus();});
+document.getElementById('logout').onclick=logout;
+
+/* ===== init ===== */
+async function appInit() {
+  // No local load — connect to the cloud first, then hydrate from it.
+  if (document.getElementById('syllabusGoal')) document.getElementById('syllabusGoal').value = SYLLABUS_GOAL;
+  if (document.getElementById('dailyTgt')) document.getElementById('dailyTgt').value = TARGET;
+  if (document.getElementById('tgtRing')) document.getElementById('tgtRing').textContent = TARGET;
+  if (document.getElementById('tgtV')) document.getElementById('tgtV').textContent = TARGET;
+  if (document.getElementById('tgt')) document.getElementById('tgt').value = Math.min(80, Math.max(30, TARGET));
+  if (document.getElementById('lvlC')) document.getElementById('lvlC').value = lvlC;
+  if (document.getElementById('lvlS')) document.getElementById('lvlS').value = lvlS;
+  if (document.getElementById('lvlL')) document.getElementById('lvlL').value = lvlL;
+  renderTaskDropdown();renderTiers();renderShip();renderQueue();renderStaffTable();
+  renderTaskTable();fillStaffSelect();renderAsgTask();renderAssignList();renderAssignBanner();
+  renderUsers();
+  document.querySelectorAll('.switch button').forEach(b=>b.style.display='none');
+  document.getElementById('liUser').focus();
+
+  // Connect to Supabase and load everything from the cloud.
+  const connected = await initSupabaseClient();
+  if (connected) {
+    console.log('Supabase connected. Loading live state from cloud...');
+    await fetchStateFromSupabase();
+  } else {
+    toast('⚠️ Could not reach the cloud database. Check connection / run the SQL script, then press Connect.');
+  }
+}
+appInit();
+
+// Global error handler to catch issues
+window.onerror = function(msg, url, line) {
+  const errDiv = document.createElement('div');
+  errDiv.style = 'position:fixed;top:0;left:0;right:0;background:red;color:white;padding:15px;z-index:9999;font-weight:bold;';
+  errDiv.textContent = 'JS Error: ' + msg + ' at ' + url + ':' + line;
+  document.body.appendChild(errDiv);
+  console.error(msg, url, line);
+};
+
+// Force focus on click for all inputs to resolve iframe/preview keyboard capture issues
+document.addEventListener('click', e => {
+  if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT')) {
+    window.focus();
+    e.target.focus();
+  }
+});
+
+window.addEventListener('load',()=>{
+  recalc();
+  if (!sbClient) {
+    syncStaffView('Anjana R');
+    renderAdminDashboard();
+  }
+});
+</script>
+</body>
+</html>

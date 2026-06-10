@@ -132,7 +132,7 @@ select:focus,input:focus{outline:none;border-color:var(--primary);box-shadow:0 0
 /* ADMIN */
 .adm-head{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:16px;margin-bottom:24px}
 .adm-head h1{font-size:clamp(24px,3vw,34px)}.adm-head p{color:var(--ink-soft);font-size:14.5px;margin-top:6px;font-weight:500}
-.stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-bottom:20px}
+.stat-row{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;margin-bottom:20px}
 @media(max-width:1000px){.stat-row{grid-template-columns:repeat(2,1fr)}}@media(max-width:560px){.stat-row{grid-template-columns:1fr}}
 .stat .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
 .stat .top .name{font-size:13px;color:var(--ink-soft);font-weight:600}
@@ -352,30 +352,18 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;heigh
       <table class="stats-table">
         <thead>
           <tr>
-            <th>Activity</th>
-            <th style="text-align: right;">This Week</th>
+            <th>Points Earned</th>
+            <th style="text-align: right;">This Week<br><span style="font-weight:400;font-size:11px;color:var(--ink-faint)">last 7 days</span></th>
             <th style="text-align: right;">This Month</th>
-            <th style="text-align: right;">Lifetime</th>
+            <th style="text-align: right;">This Year</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td>Questions Confirmed</td>
-            <td style="text-align: right; font-family: 'Bricolage Grotesque'; font-weight: 700;" id="statsQWeek">0</td>
-            <td style="text-align: right; font-family: 'Bricolage Grotesque'; font-weight: 700;" id="statsQMonth">0</td>
-            <td style="text-align: right; font-family: 'Bricolage Grotesque'; font-weight: 700;" id="statsQLifetime">0</td>
-          </tr>
-          <tr>
-            <td>Other Tasks Confirmed</td>
-            <td style="text-align: right; font-family: 'Bricolage Grotesque'; font-weight: 700;" id="statsOWeek">0</td>
-            <td style="text-align: right; font-family: 'Bricolage Grotesque'; font-weight: 700;" id="statsOMonth">0</td>
-            <td style="text-align: right; font-family: 'Bricolage Grotesque'; font-weight: 700;" id="statsOLifetime">0</td>
-          </tr>
-          <tr>
-            <td>Points Confirmed</td>
-            <td style="text-align: right; font-family: 'Bricolage Grotesque'; font-weight: 700; color: var(--primary-soft);" id="statsPWeek">0</td>
-            <td style="text-align: right; font-family: 'Bricolage Grotesque'; font-weight: 700; color: var(--primary-soft);" id="statsPMonth">0</td>
-            <td style="text-align: right; font-family: 'Bricolage Grotesque'; font-weight: 700; color: var(--primary-soft);" id="statsPLifetime">0</td>
+            <td>Confirmed points</td>
+            <td style="text-align: right; font-family: 'Bricolage Grotesque'; font-weight: 700; color: var(--primary);" id="statsPWeek">0</td>
+            <td style="text-align: right; font-family: 'Bricolage Grotesque'; font-weight: 700; color: var(--primary);" id="statsPMonth">0</td>
+            <td style="text-align: right; font-family: 'Bricolage Grotesque'; font-weight: 700; color: var(--primary);" id="statsPYear">0</td>
           </tr>
         </tbody>
       </table>
@@ -420,10 +408,8 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;heigh
     <button class="pdf" onclick="genPDF('ops')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 15V3M7 10l5 5 5-5M5 21h14"/></svg> Export</button>
   </div>
   <div class="stat-row">
-    <div class="card stat reveal" style="animation-delay:.05s"><div class="top"><span class="name">Questions confirmed</span><span class="ic">❓</span></div><div class="v num" id="statQ">0</div><div class="trend" id="trendQ"></div></div>
-    <div class="card stat reveal" style="animation-delay:.10s"><div class="top"><span class="name">Videos confirmed</span><span class="ic">🎬</span></div><div class="v num" id="statV">0</div><div class="trend" id="trendV"></div></div>
-    <div class="card stat reveal" style="animation-delay:.15s"><div class="top"><span class="name">Lessons confirmed</span><span class="ic">📚</span></div><div class="v num" id="statL">0</div><div class="trend" id="trendL"></div></div>
-    <div class="card stat reveal" style="animation-delay:.20s"><div class="top"><span class="name">Active velocity</span><span class="ic">⚡</span></div><div class="v num" id="statVel">0</div><div class="trend" id="trendVel"></div></div>
+    <div class="card stat reveal" style="animation-delay:.05s"><div class="top"><span class="name">Questions confirmed <small style="display:block;font-weight:500;font-size:11px;color:var(--ink-faint);margin-top:2px">this month</small></span><span class="ic">❓</span></div><div class="v num" id="statQ">0</div><div class="trend" id="trendQ"></div></div>
+    <div class="card stat reveal" style="animation-delay:.10s"><div class="top"><span class="name">Videos confirmed <small style="display:block;font-weight:500;font-size:11px;color:var(--ink-faint);margin-top:2px">this month</small></span><span class="ic">🎬</span></div><div class="v num" id="statV">0</div><div class="trend" id="trendV"></div></div>
   </div>
   <div class="adm-grid">
     <div>
@@ -519,7 +505,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;heigh
       <div class="addform">
         <div><span class="mini-label">New task name</span><input type="text" id="ntName" placeholder="e.g. Write quiz set"></div>
         <div><span class="mini-label">Unit</span><input type="text" id="ntUnit" placeholder="items"></div>
-        <div><span class="mini-label">Base pts</span><input type="number" id="ntPts" value="5" min="1" style="text-align:center"></div>
+        <div><span class="mini-label">Base pts</span><input type="number" step="0.1" id="ntPts" value="5" min="0.1" style="text-align:center"></div>
         <button class="btn sm" id="addTask">+ Add</button>
       </div>
       <div style="margin-top:22px;padding-top:18px;border-top:1px solid var(--line)">
@@ -638,6 +624,10 @@ document.querySelectorAll('.switch button').forEach(b=>b.onclick=()=>{
 document.getElementById('theme').onclick=()=>document.body.classList.toggle('dark');
 let tT;function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');clearTimeout(tT);tT=setTimeout(()=>t.classList.remove('show'),2800);}
 function countUp(el,to,dur=1100,suf=''){const s=parseFloat((el.textContent||'0').replace(/[,%]/g,''))||0;const t0=performance.now();(function st(n){const p=Math.min((n-t0)/dur,1),e=1-Math.pow(1-p,3);el.textContent=Math.round(s+(to-s)*e).toLocaleString()+suf;if(p<1)requestAnimationFrame(st);})(t0);}
+/* round to 1 decimal place — used so base points / earned points support decimals like 1.5, 2.4 */
+function r1(n){return Math.round((Number(n)||0)*10)/10;}
+/* format a points value: keeps up to 1 decimal, adds thousands separators, drops trailing .0 */
+function fmtPts(n){return r1(n).toLocaleString(undefined,{maximumFractionDigits:1});}
 
 /* ===== SHARED CONFIG (single source of truth) ===== */
 let taskConfig=[
@@ -681,7 +671,7 @@ function renderTiers(){
     document.querySelectorAll('#tierWrap .tier').forEach(x=>x.classList.remove('sel'));t.classList.add('sel');
     selMult=parseFloat(t.dataset.m);selDiff=t.dataset.k;recalc();});
 }
-function recalc(){const t=taskConfig.find(x=>x.id===document.getElementById('task').value);const q=Math.max(1,parseInt(document.getElementById('qty').value)||0);document.getElementById('calc').textContent=t ? Math.round(t.base*q*selMult) : 0;}
+function recalc(){const t=taskConfig.find(x=>x.id===document.getElementById('task').value);const q=Math.max(1,parseInt(document.getElementById('qty').value)||0);document.getElementById('calc').textContent=t ? fmtPts(t.base*q*selMult) : 0;}
 document.getElementById('task').onchange=e=>{selTask=e.target.value;recalc();};
 document.getElementById('qty').oninput=recalc;
 
@@ -695,15 +685,15 @@ function renderShip(){
     document.getElementById('shipList').innerHTML = '<div class="empty">No items shipped today.</div>';
     return;
   }
-  document.getElementById('shipList').innerHTML=mine.map(i=>`<div class="logitem"><span class="ico">${i.ico}</span><div class="meta"><div class="t">${i.t}</div><div class="s">${i.s}</div></div>${chip(i.st)}<span class="pts num">+${i.pts}</span></div>`).join('');
+  document.getElementById('shipList').innerHTML=mine.map(i=>`<div class="logitem"><span class="ico">${i.ico}</span><div class="meta"><div class="t">${i.t}</div><div class="s">${i.s}</div></div>${chip(i.st)}<span class="pts num">+${fmtPts(i.pts)}</span></div>`).join('');
 }
 document.getElementById('logBtn').onclick=async ()=>{
   const t=taskConfig.find(x=>x.id===document.getElementById('task').value);
-  const q=Math.max(1,parseInt(document.getElementById('qty').value)||0);const pts=Math.round(t.base*q*selMult);
+  const q=Math.max(1,parseInt(document.getElementById('qty').value)||0);const pts=r1(t.base*q*selMult);
   const logId = 'log_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
   const item={id:logId,ico:t.ico,t:t.label,s:`${q} ${t.unit} · ${selDiff}`,pts,st:'prov',user:currentUser.name,date:new Date().toISOString(),taskId:t.id,qty:q};
-  ship.unshift(item);renderShip();provisional+=pts;document.getElementById('provN').textContent=provisional;
-  toast(`Logged +${pts} provisional points — sent to Review Queue`);
+  ship.unshift(item);renderShip();provisional=r1(provisional+pts);document.getElementById('provN').textContent=fmtPts(provisional);
+  toast(`Logged +${fmtPts(pts)} provisional points — sent to Review Queue`);
   
   // Sync provisional points back to staff list
   const rec = staff.find(s => s.n === currentUser.name);
@@ -802,7 +792,7 @@ function confirmQueueItem(desc, pts) {
 function renderQueue(){
   const q=document.getElementById('queue');document.getElementById('qtag').textContent=queue.length+' waiting';
   if(!queue.length){q.innerHTML='<div class="empty">All caught up — queue is clear ✓</div>';return;}
-  q.innerHTML=queue.map((i,x)=>`<div class="qitem"><span class="av">${i.in}</span><div class="info"><div class="a">${i.n} <span style="color:var(--primary);font-weight:700">+${i.p}</span></div><div class="b">${i.d}</div></div><div class="acts"><button class="qbtn app" data-x="${x}" data-act="a"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg></button><button class="qbtn rej" data-x="${x}" data-act="r"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div></div>`).join('');
+  q.innerHTML=queue.map((i,x)=>`<div class="qitem"><span class="av">${i.in}</span><div class="info"><div class="a">${i.n} <span style="color:var(--primary);font-weight:700">+${fmtPts(i.p)}</span></div><div class="b">${i.d}</div></div><div class="acts"><button class="qbtn app" data-x="${x}" data-act="a"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg></button><button class="qbtn rej" data-x="${x}" data-act="r"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div></div>`).join('');
   q.querySelectorAll('.qbtn').forEach(b=>b.onclick=async ()=>{
     const idx = +b.dataset.x;
     const act = b.dataset.act;
@@ -811,17 +801,17 @@ function renderQueue(){
     let shipItem = null;
     
     if (act === 'a') {
-      toast(`Confirmed ${i.n}'s points (+${i.p})`);
+      toast(`Confirmed ${i.n}'s points (+${fmtPts(i.p)})`);
       confirmQueueItem(i.d, i.p);
       sRec = staff.find(s => s.n === i.n);
       if (sRec) {
-        sRec.today = (sRec.today || 0) + i.p;
-        sRec.month = (sRec.month || 0) + i.p;
-        sRec.provisional = Math.max(0, (sRec.provisional || 0) - i.p);
+        sRec.today = r1((sRec.today || 0) + i.p);
+        sRec.month = r1((sRec.month || 0) + i.p);
+        sRec.provisional = Math.max(0, r1((sRec.provisional || 0) - i.p));
         renderStaffTable();
       }
       if (currentUser && currentUser.name === i.n) {
-        provisional = Math.max(0, provisional - i.p);
+        provisional = Math.max(0, r1(provisional - i.p));
       }
       shipItem = ship.find(s => s.id === i.id || (s.user === i.n && s.pts === i.p && s.st === 'prov'));
       if (shipItem) {
@@ -833,16 +823,23 @@ function renderQueue(){
       sRec = staff.find(s => s.n === i.n);
       if (sRec) {
         sRec.rew = (parseInt(sRec.rew) + 1) + '%';
-        sRec.provisional = Math.max(0, (sRec.provisional || 0) - i.p);
+        sRec.provisional = Math.max(0, r1((sRec.provisional || 0) - i.p));
         renderStaffTable();
       }
       if (currentUser && currentUser.name === i.n) {
-        provisional = Math.max(0, provisional - i.p);
+        provisional = Math.max(0, r1(provisional - i.p));
       }
       shipItem = ship.find(s => s.id === i.id || (s.user === i.n && s.pts === i.p && s.st === 'prov'));
       if (shipItem) {
         shipItem.st = 'rew';
       }
+    }
+    // Live-refresh the staff dashboard if the affected person is the one currently viewing
+    // (updates the "awaiting review" provisional count, the confirmed ring, and contribution stats)
+    if (currentUser && currentUser.name === i.n) {
+      const provNEl = document.getElementById('provN');
+      if (provNEl) provNEl.textContent = fmtPts(provisional);
+      if (typeof syncStaffView === 'function') syncStaffView(i.n);
     }
     queue.splice(idx, 1);
     renderQueue();
@@ -873,7 +870,7 @@ function renderQueue(){
   });
 }
 function renderStaffTable(){
-  document.getElementById('staffBody').innerHTML=staff.map(s=>`<tr><td><div class="who"><span class="av">${s.in}</span><div>${s.n}<div class="role">${s.role}</div></div></div></td><td><b class="num">${s.today}</b> <span style="color:var(--ink-faint);font-size:12px">pts</span></td><td style="color:${parseInt(s.rew)>10?'var(--amber)':'var(--ink-soft)'};font-weight:600">${s.rew}</td><td><span class="att ${s.att}">${s.att==='in'?'● Clocked in':'○ Clocked out'}</span></td></tr>`).join('');
+  document.getElementById('staffBody').innerHTML=staff.map(s=>`<tr><td><div class="who"><span class="av">${s.in}</span><div>${s.n}<div class="role">${s.role}</div></div></div></td><td><b class="num">${fmtPts(s.today)}</b> <span style="color:var(--ink-faint);font-size:12px">pts</span></td><td style="color:${parseInt(s.rew)>10?'var(--amber)':'var(--ink-soft)'};font-weight:600">${s.rew}</td><td><span class="att ${s.att}">${s.att==='in'?'● Clocked in':'○ Clocked out'}</span></td></tr>`).join('');
 }
 document.getElementById('tgt').oninput=e=>{
   const val = parseInt(e.target.value) || 50;
@@ -894,19 +891,19 @@ function renderTaskTable(){
   document.getElementById('taskBody').innerHTML=taskConfig.map((t,i)=>`<tr>
     <td><span style="margin-right:8px">${t.ico}</span>${t.label}</td>
     <td style="color:var(--ink-faint)">${t.unit}</td>
-    <td style="text-align:center"><input class="pts-in" type="number" min="1" value="${t.base}" data-i="${i}"></td>
+    <td style="text-align:center"><input class="pts-in" type="number" step="0.1" min="0.1" value="${t.base}" data-i="${i}"></td>
     <td style="text-align:right"><button class="del" data-i="${i}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg></button></td></tr>`).join('');
-  document.querySelectorAll('#taskBody .pts-in').forEach(inp=>inp.onchange=()=>{taskConfig[+inp.dataset.i].base=Math.max(1,parseInt(inp.value)||1);renderTaskDropdown();recalc();drawAnalytics();toast('Points updated — live on staff log');saveState();});
+  document.querySelectorAll('#taskBody .pts-in').forEach(inp=>inp.onchange=()=>{taskConfig[+inp.dataset.i].base=Math.max(0.1,r1(parseFloat(inp.value)||0.1));renderTaskDropdown();recalc();drawAnalytics();toast('Points updated — live on staff log');saveState();});
   document.querySelectorAll('#taskBody .del').forEach(b=>b.onclick=()=>{if(taskConfig.length<=1)return toast('Keep at least one task');const r=taskConfig.splice(+b.dataset.i,1)[0];refreshTaskEverywhere();toast(`Removed "${r.label}"`);saveState();});
 }
 function refreshTaskEverywhere(){renderTaskTable();renderTaskDropdown();renderAsgTask();recalc();}
 document.getElementById('addTask').onclick=()=>{
   const name=document.getElementById('ntName').value.trim();const unit=document.getElementById('ntUnit').value.trim()||'items';
-  const pts=Math.max(1,parseInt(document.getElementById('ntPts').value)||1);
+  const pts=Math.max(0.1,r1(parseFloat(document.getElementById('ntPts').value)||0.1));
   if(!name)return toast('Enter a task name');
   taskConfig.push({id:'t'+Date.now(),label:name,unit,base:pts,ico:'✏️'});
   document.getElementById('ntName').value='';document.getElementById('ntUnit').value='';document.getElementById('ntPts').value=5;
-  refreshTaskEverywhere();toast(`Added "${name}" (${pts} pts/${unit})`);
+  refreshTaskEverywhere();toast(`Added "${name}" (${fmtPts(pts)} pts/${unit})`);
   saveState();
 };
 ['mEasy','mMed','mHard'].forEach((id,i)=>document.getElementById(id).onchange=e=>{
@@ -2073,68 +2070,29 @@ function renderStaffStatsCard(targetName) {
   const confLogs = userLogs.filter(s => s.st === 'conf');
 
   const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
-  const oneMonthAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
+  const now = new Date();
+  const curMonth = now.getMonth();
+  const curYear = now.getFullYear();
 
-  let qWeek = 0, qMonth = 0, qTotal = 0;
-  let oWeek = 0, oMonth = 0, oTotal = 0;
-  let pWeek = 0, pMonth = 0, pTotal = 0;
-
-  function getLogTaskStats(log) {
-    if (log.taskId && log.qty !== undefined) {
-      return {
-        type: log.taskId === 'q' ? 'q' : 'other',
-        qty: log.qty
-      };
-    }
-    let qty = 0;
-    const numMatch = log.s ? log.s.match(/(\d+)/) : null;
-    if (numMatch) {
-      qty = parseInt(numMatch[1]);
-    } else {
-      qty = 1;
-    }
-    const labelLower = (log.t || '').toLowerCase();
-    const descLower = (log.s || '').toLowerCase();
-    let type = 'other';
-    if (labelLower.includes('question') || descLower.includes('question')) {
-      type = 'q';
-    }
-    return { type, qty };
-  }
+  // Only points earned (confirmed) are needed, across three periods.
+  let pWeek = 0, pMonth = 0, pYear = 0;
 
   confLogs.forEach(log => {
-    const logTime = log.date ? new Date(log.date).getTime() : Date.now();
-    const stats = getLogTaskStats(log);
+    const d = log.date ? new Date(log.date) : new Date();
+    const logTime = d.getTime();
     const pts = log.pts || 0;
 
-    // Total
-    if (stats.type === 'q') {
-      qTotal += stats.qty;
-    } else {
-      oTotal += stats.qty;
-    }
-    pTotal += pts;
-
-    // Month
-    if (logTime >= oneMonthAgo) {
-      if (stats.type === 'q') {
-        qMonth += stats.qty;
-      } else {
-        oMonth += stats.qty;
-      }
-      pMonth += pts;
-    }
-
-    // Week
-    if (logTime >= oneWeekAgo) {
-      if (stats.type === 'q') {
-        qWeek += stats.qty;
-      } else {
-        oWeek += stats.qty;
-      }
-      pWeek += pts;
-    }
+    // This week — rolling last 7 days
+    if (logTime >= oneWeekAgo) pWeek += pts;
+    // This month — current calendar month
+    if (d.getFullYear() === curYear && d.getMonth() === curMonth) pMonth += pts;
+    // This year — current calendar year
+    if (d.getFullYear() === curYear) pYear += pts;
   });
+
+  pWeek = r1(pWeek);
+  pMonth = r1(pMonth);
+  pYear = r1(pYear);
 
   // Calculate team standing (rank)
   const sortedStaff = [...staff].sort((a, b) => (b.month || 0) - (a.month || 0));
@@ -2155,35 +2113,18 @@ function renderStaffStatsCard(targetName) {
     levelName = 'Level 2';
   }
 
-  // Update DOM
-  const elQWeek = document.getElementById('statsQWeek');
-  const elQMonth = document.getElementById('statsQMonth');
-  const elQLifetime = document.getElementById('statsQLifetime');
-
-  const elOWeek = document.getElementById('statsOWeek');
-  const elOMonth = document.getElementById('statsOMonth');
-  const elOLifetime = document.getElementById('statsOLifetime');
-
+  // Update DOM — points earned only
   const elPWeek = document.getElementById('statsPWeek');
   const elPMonth = document.getElementById('statsPMonth');
-  const elPLifetime = document.getElementById('statsPLifetime');
+  const elPYear = document.getElementById('statsPYear');
 
   const elRank = document.getElementById('statsRank');
   const elGoal = document.getElementById('statsGoalProgress');
   const elLevel = document.getElementById('statsLevel');
 
-  if (elQLifetime) countUp(elQLifetime, qTotal, 800);
-  if (elOLifetime) countUp(elOLifetime, oTotal, 800);
-  if (elPLifetime) countUp(elPLifetime, pTotal, 800);
-
-  if (elQWeek) elQWeek.textContent = qWeek.toLocaleString();
-  if (elQMonth) elQMonth.textContent = qMonth.toLocaleString();
-
-  if (elOWeek) elOWeek.textContent = oWeek.toLocaleString();
-  if (elOMonth) elOMonth.textContent = oMonth.toLocaleString();
-
-  if (elPWeek) elPWeek.textContent = pWeek.toLocaleString() + ' pts';
-  if (elPMonth) elPMonth.textContent = pMonth.toLocaleString() + ' pts';
+  if (elPWeek) elPWeek.textContent = fmtPts(pWeek) + ' pts';
+  if (elPMonth) elPMonth.textContent = fmtPts(pMonth) + ' pts';
+  if (elPYear) elPYear.textContent = fmtPts(pYear) + ' pts';
 
   if (elRank) elRank.textContent = rankText;
   if (elGoal) elGoal.textContent = goalText;
@@ -2219,15 +2160,15 @@ function syncStaffView(targetName) {
   }
   
   // Points
-  confirmed = rec.today || 0;
-  provisional = rec.provisional || 0;
+  confirmed = r1(rec.today || 0);
+  provisional = r1(rec.provisional || 0);
   currentXP = rec.month || 0;
   
   const cptsEl = document.getElementById('cpts');
   if (cptsEl) cptsEl.textContent = '0';
   
   const provNEl = document.getElementById('provN');
-  if (provNEl) provNEl.textContent = provisional.toLocaleString();
+  if (provNEl) provNEl.textContent = fmtPts(provisional);
   
   setTimeout(() => {
     if (document.getElementById('cpts')) {

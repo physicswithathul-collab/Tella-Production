@@ -426,7 +426,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;heigh
       </div>
       <div class="card mt20 reveal" style="animation-delay:.34s">
         <div class="sec-h"><h2>Staff</h2></div>
-        <table><thead><tr><th>Person</th><th>Today</th><th>Rework</th><th>Attendance</th></tr></thead><tbody id="staffBody"></tbody></table>
+        <table><thead><tr><th>Person</th><th>Today</th><th>Tasks today</th><th>This month</th><th>Rework</th><th>Attendance</th></tr></thead><tbody id="staffBody"></tbody></table>
         <div class="payroll-note"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01" stroke-linecap="round"/></svg> Attendance feeds payroll only — kept separate from the performance score.</div>
       </div>
     </div>
@@ -629,6 +629,58 @@ function r1(n){return Math.round((Number(n)||0)*10)/10;}
 /* format a points value: keeps up to 1 decimal, adds thousands separators, drops trailing .0 */
 function fmtPts(n){return r1(n).toLocaleString(undefined,{maximumFractionDigits:1});}
 
+/* ===== POINTS ENGINE — single source of truth = confirmed ship logs =====
+   Every daily / weekly / monthly / yearly figure (and the daily task count)
+   is DERIVED from the ship[] logs, filtered by user + date + status, instead
+   of from stand-alone running counters that can drift out of sync. This is
+   what makes the build stable: the same number is computed the same way
+   everywhere it is shown. No database rows are modified or erased. */
+function _startOfToday(){const d=new Date();d.setHours(0,0,0,0);return d.getTime();}
+function _startOfMonth(){const d=new Date();return new Date(d.getFullYear(),d.getMonth(),1).getTime();}
+function _startOfYear(){const d=new Date();return new Date(d.getFullYear(),0,1).getTime();}
+function _rolling7(){return Date.now()-7*24*60*60*1000;}
+function _logTime(log){const v=(log&&log.date)?new Date(log.date).getTime():NaN;return isNaN(v)?0:v;}
+
+/* Sum points + task count for one staff member since a timestamp.
+   Defaults to confirmed ('conf') entries — the points that actually count. */
+function aggPoints(name, sinceTs, status){
+  if(status===undefined) status='conf';
+  let pts=0, tasks=0, qty=0;
+  for(const log of ship){
+    if(log.user!==name) continue;
+    if(status && log.st!==status) continue;
+    if(_logTime(log) < sinceTs) continue;
+    pts  += Number(log.pts)||0;
+    qty  += Number(log.qty)||0;
+    tasks+= 1;
+  }
+  return {pts:r1(pts), tasks, qty};
+}
+function dailyAgg(name){  return aggPoints(name,_startOfToday()); }
+function weeklyAgg(name){ return aggPoints(name,_rolling7());     }
+function monthlyAgg(name){return aggPoints(name,_startOfMonth()); }
+function yearlyAgg(name){ return aggPoints(name,_startOfYear());  }
+
+/* Provisional (awaiting-review) points for a member — not date-bound. */
+function provPoints(name){
+  let p=0;
+  for(const log of ship){ if(log.user===name && log.st==='prov') p+=Number(log.pts)||0; }
+  return r1(p);
+}
+
+/* Refresh the cached today / month / todayTasks / provisional fields on every
+   staff record straight from the logs, so the stored counters can never drift.
+   Call this before rendering tables and after any confirm / reject. */
+function recomputeStaffAggregates(){
+  staff.forEach(s=>{
+    const d=dailyAgg(s.n), m=monthlyAgg(s.n);
+    s.today      = d.pts;
+    s.todayTasks = d.tasks;
+    s.month      = m.pts;
+    s.provisional= provPoints(s.n);
+  });
+}
+
 /* ===== SHARED CONFIG (single source of truth) ===== */
 let taskConfig=[
   {id:'q',label:'Add questions to question bank',unit:'questions',base:2,ico:'❓'},
@@ -692,7 +744,7 @@ document.getElementById('logBtn').onclick=async ()=>{
   const q=Math.max(1,parseInt(document.getElementById('qty').value)||0);const pts=r1(t.base*q*selMult);
   const logId = 'log_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
   const item={id:logId,ico:t.ico,t:t.label,s:`${q} ${t.unit} · ${selDiff}`,pts,st:'prov',user:currentUser.name,date:new Date().toISOString(),taskId:t.id,qty:q};
-  ship.unshift(item);renderShip();provisional=r1(provisional+pts);document.getElementById('provN').textContent=fmtPts(provisional);
+  ship.unshift(item);renderShip();provisional=provPoints(currentUser.name);document.getElementById('provN').textContent=fmtPts(provisional);
   toast(`Logged +${fmtPts(pts)} provisional points — sent to Review Queue`);
   
   // Sync provisional points back to staff list
@@ -759,24 +811,29 @@ function renderAssignBanner(){
 /* ===== ADMIN review queue / staff table ===== */
 let queue=[];
 
-function confirmQueueItem(desc, pts) {
+function confirmQueueItem(desc, pts, shipItem) {
   let qty = 0;
   let typeId = '';
-  const numMatch = desc.match(/(\d+)/);
-  if (numMatch) {
-    qty = parseInt(numMatch[1]);
-  } else {
-    qty = 1;
+  // Prefer the real logged values — stable, no fragile string parsing.
+  if (shipItem) {
+    if (Number(shipItem.qty) > 0) qty = Number(shipItem.qty);
+    if (['q','v','l','r'].includes(shipItem.taskId)) typeId = shipItem.taskId;
   }
-  const dLower = desc.toLowerCase();
-  if (dLower.includes('question')) {
-    typeId = 'q';
-  } else if (dLower.includes('video') || dLower.includes('explainer')) {
-    typeId = 'v';
-  } else if (dLower.includes('lesson')) {
-    typeId = 'l';
-  } else if (dLower.includes('review') || dLower.includes('peer')) {
-    typeId = 'r';
+  if (!qty) {
+    const numMatch = desc.match(/(\d+)/);
+    qty = numMatch ? parseInt(numMatch[1]) : 1;
+  }
+  if (!typeId) {
+    const dLower = desc.toLowerCase();
+    if (dLower.includes('question')) {
+      typeId = 'q';
+    } else if (dLower.includes('video') || dLower.includes('explainer')) {
+      typeId = 'v';
+    } else if (dLower.includes('lesson')) {
+      typeId = 'l';
+    } else if (dLower.includes('review') || dLower.includes('peer')) {
+      typeId = 'r';
+    }
   }
   if (typeId) {
     if (outputMix[typeId] !== undefined) {
@@ -802,20 +859,19 @@ function renderQueue(){
     
     if (act === 'a') {
       toast(`Confirmed ${i.n}'s points (+${fmtPts(i.p)})`);
-      confirmQueueItem(i.d, i.p);
       sRec = staff.find(s => s.n === i.n);
-      if (sRec) {
-        sRec.today = r1((sRec.today || 0) + i.p);
-        sRec.month = r1((sRec.month || 0) + i.p);
-        sRec.provisional = Math.max(0, r1((sRec.provisional || 0) - i.p));
-        renderStaffTable();
-      }
-      if (currentUser && currentUser.name === i.n) {
-        provisional = Math.max(0, r1(provisional - i.p));
-      }
+      // Flip the underlying ship log to confirmed — this is the source of truth.
       shipItem = ship.find(s => s.id === i.id || (s.user === i.n && s.pts === i.p && s.st === 'prov'));
       if (shipItem) {
         shipItem.st = 'conf';
+      }
+      // Update output-mix / velocity using the real logged qty (stable, no string parsing).
+      confirmQueueItem(i.d, i.p, shipItem);
+      // Recompute every staff member's today / month / provisional straight from logs.
+      recomputeStaffAggregates();
+      renderStaffTable();
+      if (currentUser && currentUser.name === i.n) {
+        provisional = provPoints(i.n);
       }
       renderAdminDashboard();
     } else {
@@ -823,15 +879,16 @@ function renderQueue(){
       sRec = staff.find(s => s.n === i.n);
       if (sRec) {
         sRec.rew = (parseInt(sRec.rew) + 1) + '%';
-        sRec.provisional = Math.max(0, r1((sRec.provisional || 0) - i.p));
-        renderStaffTable();
       }
-      if (currentUser && currentUser.name === i.n) {
-        provisional = Math.max(0, r1(provisional - i.p));
-      }
+      // Mark the log as needing rework so it stops counting as provisional or confirmed.
       shipItem = ship.find(s => s.id === i.id || (s.user === i.n && s.pts === i.p && s.st === 'prov'));
       if (shipItem) {
         shipItem.st = 'rew';
+      }
+      recomputeStaffAggregates();
+      renderStaffTable();
+      if (currentUser && currentUser.name === i.n) {
+        provisional = provPoints(i.n);
       }
     }
     // Live-refresh the staff dashboard if the affected person is the one currently viewing
@@ -870,7 +927,16 @@ function renderQueue(){
   });
 }
 function renderStaffTable(){
-  document.getElementById('staffBody').innerHTML=staff.map(s=>`<tr><td><div class="who"><span class="av">${s.in}</span><div>${s.n}<div class="role">${s.role}</div></div></div></td><td><b class="num">${fmtPts(s.today)}</b> <span style="color:var(--ink-faint);font-size:12px">pts</span></td><td style="color:${parseInt(s.rew)>10?'var(--amber)':'var(--ink-soft)'};font-weight:600">${s.rew}</td><td><span class="att ${s.att}">${s.att==='in'?'● Clocked in':'○ Clocked out'}</span></td></tr>`).join('');
+  recomputeStaffAggregates();
+  document.getElementById('staffBody').innerHTML=staff.map(s=>{
+    const d=dailyAgg(s.n);
+    return `<tr><td><div class="who"><span class="av">${s.in}</span><div>${s.n}<div class="role">${s.role}</div></div></div></td>`+
+      `<td><b class="num">${fmtPts(d.pts)}</b> <span style="color:var(--ink-faint);font-size:12px">pts</span></td>`+
+      `<td><b class="num">${d.tasks}</b> <span style="color:var(--ink-faint);font-size:12px">task${d.tasks===1?'':'s'}</span></td>`+
+      `<td><b class="num">${fmtPts(s.month)}</b> <span style="color:var(--ink-faint);font-size:12px">pts</span></td>`+
+      `<td style="color:${parseInt(s.rew)>10?'var(--amber)':'var(--ink-soft)'};font-weight:600">${s.rew}</td>`+
+      `<td><span class="att ${s.att}">${s.att==='in'?'● Clocked in':'○ Clocked out'}</span></td></tr>`;
+  }).join('');
 }
 document.getElementById('tgt').oninput=e=>{
   const val = parseInt(e.target.value) || 50;
@@ -1382,6 +1448,7 @@ function renderGrowthCard() {
 }
 
 function drawAnalytics(){
+  recomputeStaffAggregates();
   const maxVal = Math.max(1, outputMix.q, outputMix.v, outputMix.l, outputMix.r);
   const mixWrap = document.getElementById('outputMixWrap');
   if (mixWrap) {
@@ -1488,8 +1555,10 @@ function genPDF(kind){
   const title=titleMap[kind]||'Production Report';
   const stat=(n,v,d)=>`<div class="rstat"><div class="rsn">${n}</div><div class="rsv">${v}</div><div class="rsd">${d}</div></div>`;
   const kv=(k,v)=>`<tr><td class="rk">${k}</td><td class="rv">${v}</td></tr>`;
-  const srows=[...staff].sort((a,b)=>b.month-a.month)
-    .map(s=>`<tr><td>${s.n}</td><td class="rmut">${s.role}</td><td class="rnum">${Math.round(s.month*D.scale).toLocaleString()} pts</td></tr>`).join('');
+  const aggByRange = {Daily:dailyAgg, Weekly:weeklyAgg, Monthly:monthlyAgg, Yearly:yearlyAgg};
+  const af = aggByRange[range] || monthlyAgg;
+  const srows=[...staff].map(s=>({s, a:af(s.n)})).sort((x,y)=>y.a.pts-x.a.pts)
+    .map(({s,a})=>`<tr><td>${s.n}</td><td class="rmut">${s.role}</td><td class="rnum">${fmtPts(a.pts)} pts</td></tr>`).join('');
   
   let forecastDateStr = '';
   if (outputMix.q >= SYLLABUS_GOAL) {
@@ -1823,6 +1892,10 @@ async function fetchStateFromSupabase() {
       }));
     }
 
+    // Reconcile every staff member's today / month / provisional against the
+    // freshly loaded logs so any stale stored counters self-correct on load.
+    recomputeStaffAggregates();
+
     // Synchronize current local configurations and render all views
     syncConfigInputs();
     renderTaskDropdown();
@@ -2066,46 +2139,30 @@ function renderStaffStatsCard(targetName) {
   const rec = staff.find(s => s.n === targetName);
   if (!rec) return;
 
-  const userLogs = ship.filter(s => s.user === targetName);
-  const confLogs = userLogs.filter(s => s.st === 'conf');
+  // All period totals come from the same log-derived engine — guaranteed to
+  // match the staff table, the admin tab and the ring.
+  const wk = weeklyAgg(targetName);
+  const mo = monthlyAgg(targetName);
+  const yr = yearlyAgg(targetName);
+  const day = dailyAgg(targetName);
 
-  const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
-  const now = new Date();
-  const curMonth = now.getMonth();
-  const curYear = now.getFullYear();
+  const pWeek = wk.pts;
+  const pMonth = mo.pts;
+  const pYear = yr.pts;
 
-  // Only points earned (confirmed) are needed, across three periods.
-  let pWeek = 0, pMonth = 0, pYear = 0;
-
-  confLogs.forEach(log => {
-    const d = log.date ? new Date(log.date) : new Date();
-    const logTime = d.getTime();
-    const pts = log.pts || 0;
-
-    // This week — rolling last 7 days
-    if (logTime >= oneWeekAgo) pWeek += pts;
-    // This month — current calendar month
-    if (d.getFullYear() === curYear && d.getMonth() === curMonth) pMonth += pts;
-    // This year — current calendar year
-    if (d.getFullYear() === curYear) pYear += pts;
-  });
-
-  pWeek = r1(pWeek);
-  pMonth = r1(pMonth);
-  pYear = r1(pYear);
-
-  // Calculate team standing (rank)
+  // Team standing (rank) — by this-month points, recomputed from logs for everyone.
+  recomputeStaffAggregates();
   const sortedStaff = [...staff].sort((a, b) => (b.month || 0) - (a.month || 0));
   const rank = sortedStaff.findIndex(s => s.n === targetName) + 1;
   const rankText = rank > 0 ? `#${rank} of ${staff.length}` : '#—';
 
-  // Calculate daily goal progress
-  const confirmedPts = rec.today || 0;
+  // Daily goal progress — based on today's confirmed points.
+  const confirmedPts = day.pts;
   const goalPct = TARGET > 0 ? Math.round((confirmedPts / TARGET) * 100) : 0;
   const goalText = `${goalPct}%`;
 
-  // Get growth level
-  const xp = rec.month || 0;
+  // Growth level — driven by this-month points.
+  const xp = pMonth;
   let levelName = 'Level 1';
   if (xp >= lvlL) {
     levelName = 'Level 3';
@@ -2159,10 +2216,10 @@ function syncStaffView(targetName) {
     }
   }
   
-  // Points
-  confirmed = r1(rec.today || 0);
-  provisional = r1(rec.provisional || 0);
-  currentXP = rec.month || 0;
+  // Points — derived live from this member's confirmed logs (single source of truth)
+  confirmed = dailyAgg(targetName).pts;     // confirmed points earned TODAY
+  provisional = provPoints(targetName);     // points still awaiting review
+  currentXP = monthlyAgg(targetName).pts;   // this-month points drive growth/XP
   
   const cptsEl = document.getElementById('cpts');
   if (cptsEl) cptsEl.textContent = '0';

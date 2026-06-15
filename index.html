@@ -441,7 +441,7 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;heigh
       <div class="card mt20 reveal" style="animation-delay:.30s">
         <div class="sec-h"><h2>Incentive setup</h2></div>
         <div class="inc-row"><span style="font-size:13.5px;font-weight:600;color:var(--ink-soft)">Daily point target</span><span class="v"><span id="tgtV">50</span> pts</span></div>
-        <input type="range" id="tgt" min="30" max="80" value="50">
+        <input type="number" id="tgt" min="1" value="50" style="width:100%;font-family:'Bricolage Grotesque';font-weight:700;font-size:16px;padding:11px 14px;border:1px solid var(--line);border-radius:11px;background:var(--surface-2);color:var(--ink)">
         <div style="font-size:13px;color:var(--ink-soft);font-weight:500;margin:14px 0 6px">Bonus curve — smooth, no hard cliffs</div>
         <svg width="100%" height="120" viewBox="0 0 300 120" preserveAspectRatio="none" style="background:var(--surface-2);border-radius:12px;border:1px solid var(--line)">
           <path d="M10,108 C90,108 150,95 175,60 C205,18 250,14 290,12" fill="none" stroke="var(--primary)" stroke-width="3" stroke-linecap="round"/>
@@ -939,7 +939,7 @@ function renderStaffTable(){
   }).join('');
 }
 document.getElementById('tgt').oninput=e=>{
-  const val = parseInt(e.target.value) || 50;
+  const val = Math.max(1, parseInt(e.target.value) || 1);
   document.getElementById('tgtV').textContent=val;
   TARGET = val;
   if (document.getElementById('dailyTgt')) document.getElementById('dailyTgt').value = TARGET;
@@ -1020,7 +1020,7 @@ document.getElementById('saveCfg').onclick=()=>{
   leadXP=lvlL;
   SYLLABUS_GOAL=Math.max(1,parseInt(document.getElementById('syllabusGoal').value)||2000);
   document.getElementById('tgtRing').textContent=TARGET;
-  document.getElementById('tgtV').textContent=TARGET;document.getElementById('tgt').value=Math.min(80,Math.max(30,TARGET));
+  document.getElementById('tgtV').textContent=TARGET;document.getElementById('tgt').value=TARGET;
   const elLeadXP = document.getElementById('leadXP');
   if (elLeadXP) elLeadXP.textContent=leadXP.toLocaleString();
   const elToLead = document.getElementById('toLead');
@@ -1934,7 +1934,7 @@ function syncConfigInputs() {
   if (document.getElementById('dailyTgt')) document.getElementById('dailyTgt').value = TARGET;
   if (document.getElementById('tgtRing')) document.getElementById('tgtRing').textContent = TARGET;
   if (document.getElementById('tgtV')) document.getElementById('tgtV').textContent = TARGET;
-  if (document.getElementById('tgt')) document.getElementById('tgt').value = Math.min(80, Math.max(30, TARGET));
+  if (document.getElementById('tgt')) document.getElementById('tgt').value = TARGET;
   if (document.getElementById('lvlC')) document.getElementById('lvlC').value = lvlC;
   if (document.getElementById('lvlS')) document.getElementById('lvlS').value = lvlS;
   if (document.getElementById('lvlL')) document.getElementById('lvlL').value = lvlL;
@@ -2380,7 +2380,7 @@ async function appInit() {
   if (document.getElementById('dailyTgt')) document.getElementById('dailyTgt').value = TARGET;
   if (document.getElementById('tgtRing')) document.getElementById('tgtRing').textContent = TARGET;
   if (document.getElementById('tgtV')) document.getElementById('tgtV').textContent = TARGET;
-  if (document.getElementById('tgt')) document.getElementById('tgt').value = Math.min(80, Math.max(30, TARGET));
+  if (document.getElementById('tgt')) document.getElementById('tgt').value = TARGET;
   if (document.getElementById('lvlC')) document.getElementById('lvlC').value = lvlC;
   if (document.getElementById('lvlS')) document.getElementById('lvlS').value = lvlS;
   if (document.getElementById('lvlL')) document.getElementById('lvlL').value = lvlL;
